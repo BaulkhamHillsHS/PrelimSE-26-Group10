@@ -2,6 +2,16 @@
 import customtkinter as ctk
 import tkinter as tk
 
+class FontSize: 
+    # so that we can easily change formatting
+    # use variables (like FontSize.Title) instead of 16
+    Title = 16
+    """16"""
+    Subtitle = 14
+    """14"""
+    Text = 11
+    """11"""
+
 class VideoFrame(ctk.CTkFrame):
     """
     UI component to display videos (movies and tv shows)
