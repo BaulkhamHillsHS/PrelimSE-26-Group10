@@ -13,7 +13,11 @@ class FontSize:
     """11"""
 
 class SettingsPage(ctk.CTkFrame):
-    pass
+    def __init__(self):
+        super().__init__()
+    
+    def _build_ui(self):
+        pass
 
 class VideoPage(ctk.CTkFrame):
     """
@@ -26,17 +30,25 @@ class VideoPage(ctk.CTkFrame):
         pass
 
 class LoginPage(ctk.CTkFrame):
-    def __init__():
-        pass
+    def __init__(self):
+        super().__init__()
     
-    def _build_ui():
+    def _build_ui(self):
         pass
 
 class SignUpPage(ctk.CTkFrame):
-    pass
+    def __init__(self):
+        super().__init__()
+    
+    def _build_ui(self):
+        pass
 
 class PaymentPlanPage(ctk.CTkFrame):
-    pass
+    def __init__(self):
+        super().__init__()
+    
+    def _build_ui(self):
+        pass
 
 class StreamingApp(ctk.CTk):
     Title = "App"
