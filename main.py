@@ -12,6 +12,15 @@ class FontSize:
     Text = 11
     """11"""
 
+class ColourScheme: # for colours that won't change throughout whole app
+    #temporary (looks very bad)
+    Primary = "#34c9c0"
+    Secondary = "#dee60e"
+    Foreground = "#3c807e"
+    Background = "#000000"  
+    Button = "#3b7472"
+    ButtonHover = "#40a3a0"
+
 class StandardPage(ctk.CTkFrame):
     """
     Parent class for pages that can be accessed when in a profile
@@ -41,13 +50,13 @@ class VideoPage(StandardPage):
 
 class LoginPage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(fg_color=ColourScheme.Background, *args, **kwargs)
         self.grid_rowconfigure(0,weight=1)
         self.grid_columnconfigure(0,weight=1)
         self._build_ui()
     
     def _build_ui(self):
-        self.login_frame = ctk.CTkFrame(self)
+        self.login_frame = ctk.CTkFrame(self, fg_color=ColourScheme.Foreground)
         self.login_frame.grid(row=0, column=0, ipadx=100, ipady=0)
         
         self.text = ctk.CTkLabel(self.login_frame, text="Login Page")
@@ -59,7 +68,7 @@ class LoginPage(ctk.CTkFrame):
         self.password_entry = ctk.CTkEntry(self.login_frame, placeholder_text="Enter your password")
         self.password_entry.pack(padx=0,pady=20)
         
-        self.login_button = ctk.CTkButton(self.login_frame, text="Login")
+        self.login_button = ctk.CTkButton(self.login_frame, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
         self.login_button.pack(padx=0,pady=30)
 
 class SignUpPage(ctk.CTkFrame):
