@@ -16,6 +16,6 @@ class MovieData(VideoData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-class TvShowData(VideoData):
+class TVShowData(VideoData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
