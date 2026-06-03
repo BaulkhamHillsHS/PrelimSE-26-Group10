@@ -1,6 +1,8 @@
 # main file for displaying GUI components
+import csv
 import customtkinter as ctk
 import tkinter as tk
+from videomodule import movies
 
 class FontSize: 
     # so that we can easily change formatting
@@ -20,6 +22,7 @@ class ColourScheme: # for colours that won't change throughout whole app
     Background = "#000000"  
     Button = "#3b7472"
     ButtonHover = "#40a3a0"
+
 
 class StandardPage(ctk.CTkFrame):
     """
@@ -70,13 +73,18 @@ class LoginPage(ctk.CTkFrame):
         
         self.login_button = ctk.CTkButton(self.login_frame, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
         self.login_button.pack(padx=0,pady=30)
-
-class SignUpPage(ctk.CTkFrame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
-    def _build_ui(self):
-        pass
+        
+        #practice import of an image
+        #it looks really ugly and out of place rn, but this was just to check if an 
+        #image could be imported. I will fix it.
+        m_rom1_raw = movies[0]
+        m_rom1_img = ctk.CTkImage(
+            light_image=m_rom1_raw.thumbnail,
+            dark_image=m_rom1_raw.thumbnail,
+            size=(200,300)
+        )
+        self.m_rom1_icon = ctk.CTkLabel(self.login_frame,text="",image=m_rom1_img)
+        self.m_rom1_icon.pack(padx=0,pady=30)
 
 class PaymentPlanPage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
@@ -112,7 +120,10 @@ class StreamingApp(ctk.CTk):
         self.currentpage = page
         self.currentpage.grid(row=0, column=0, sticky="nesw")
         
+
+        
 if __name__ == "__main__":
     app = StreamingApp()
     app._test_page(LoginPage(app))
     app.mainloop()
+
