@@ -45,13 +45,6 @@ class StandardPage(ctk.CTkFrame):
         for child in self.winfo_children():
             pass
 
-class SettingsPage(StandardPage):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
-    def _build_ui(self):
-        pass
-
 class VideoPage(StandardPage):
     """
     Screen to display when selecting a movie/show
