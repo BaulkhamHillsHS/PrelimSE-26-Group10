@@ -1,6 +1,8 @@
 # main file for displaying GUI components
 import customtkinter as ctk
 import tkinter as tk
+import accountmodule as Account
+import videomodule as Video
 
 class FontSize: 
     # so that we can easily change formatting
@@ -31,6 +33,10 @@ class StandardPage(ctk.CTkFrame):
     def _build_ui(self):
         pass
 
+    def _apply_theme(self, theme):
+        for child in self.winfo_children():
+            pass
+
 class SettingsPage(StandardPage):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -48,9 +54,12 @@ class VideoPage(StandardPage):
     def _build_ui(self):
         pass
 
+class SubscriptionManagementPage(StandardPage):
+    pass
+
 class LoginPage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
-        super().__init__(fg_color=ColourScheme.Background, *args, **kwargs)
+        super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
         self.grid_rowconfigure(0,weight=1)
         self.grid_columnconfigure(0,weight=1)
         self._build_ui()
@@ -70,20 +79,6 @@ class LoginPage(ctk.CTkFrame):
         
         self.login_button = ctk.CTkButton(self.login_frame, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
         self.login_button.pack(padx=0,pady=30)
-
-class SignUpPage(ctk.CTkFrame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
-    def _build_ui(self):
-        pass
-
-class PaymentPlanPage(ctk.CTkFrame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
-    def _build_ui(self):
-        pass
 
 class StreamingApp(ctk.CTk):
     Title = "App"
