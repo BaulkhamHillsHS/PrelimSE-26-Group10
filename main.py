@@ -23,6 +23,14 @@ class ColourScheme: # for colours that won't change throughout whole app
     Button = "#3b7472"
     ButtonHover = "#40a3a0"
 
+class VideoWidget(ctk.CTkFrame):
+    def __init__(self, image,  *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.image = image
+    
+    def _build_ui(self):
+        pass
+
 class StandardPage(ctk.CTkFrame):
     """
     Parent class for pages that can be accessed when in a profile
