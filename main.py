@@ -2,6 +2,8 @@
 import csv
 import customtkinter as ctk
 import tkinter as tk
+import accountmodule as Account
+import videomodule as Video
 from videomodule import movies
 
 class FontSize: 
@@ -23,6 +25,14 @@ class ColourScheme: # for colours that won't change throughout whole app
     Button = "#3b7472"
     ButtonHover = "#40a3a0"
 
+class VideoWidget(ctk.CTkFrame):
+    def __init__(self, image,  *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.image = image
+    
+    def _build_ui(self):
+        pass
+
 
 class StandardPage(ctk.CTkFrame):
     """
@@ -34,12 +44,9 @@ class StandardPage(ctk.CTkFrame):
     def _build_ui(self):
         pass
 
-class SettingsPage(StandardPage):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
-    def _build_ui(self):
-        pass
+    def _apply_theme(self, theme):
+        for child in self.winfo_children():
+            pass
 
 class VideoPage(StandardPage):
     """
@@ -51,9 +58,12 @@ class VideoPage(StandardPage):
     def _build_ui(self):
         pass
 
+class SubscriptionManagementPage(StandardPage):
+    pass
+
 class LoginPage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
-        super().__init__(fg_color=ColourScheme.Background, *args, **kwargs)
+        super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
         self.grid_rowconfigure(0,weight=1)
         self.grid_columnconfigure(0,weight=1)
         self._build_ui()
@@ -73,6 +83,7 @@ class LoginPage(ctk.CTkFrame):
         
         self.login_button = ctk.CTkButton(self.login_frame, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
         self.login_button.pack(padx=0,pady=30)
+
         
         #practice import of an image
         #it looks really ugly and out of place rn, but this was just to check if an 
