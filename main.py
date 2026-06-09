@@ -3,7 +3,6 @@ import csv
 import customtkinter as ctk
 import tkinter as tk
 import accountmodule as Account
-import videomodule as Video
 from videomodule import movies
 
 class FontSize: 
@@ -81,15 +80,20 @@ class LoginPage(ctk.CTkFrame):
         super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
         
         self._build_ui()
+
+    def Login(self, email, password):
         
+        if email == "test@gmail.com" and password == "abc123":        
+            print("Logged in")
+        else:
+            print("Incorrect email or password")
+   
     
     def _build_ui(self):
-        
-        
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
-        self.label = ctk.CTkLabel(self, text="AppName", text_color=ColourScheme.Text, font=("arial", 40))
+        self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
         self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
         
         self.label = ctk.CTkLabel(self, text="Email", text_color=ColourScheme.Text, font=("arial", 20))
@@ -104,8 +108,9 @@ class LoginPage(ctk.CTkFrame):
         self.password_entry = ctk.CTkEntry(self, placeholder_text="Enter your password", height=30)
         self.password_entry.grid(row=4, column=1, padx=20, pady=5, sticky="ew")
         
-        self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
+        self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=lambda: self.Login(self.email_entry.get(), self.password_entry.get()))
         self.login_button.grid(row=5, column=1, padx=40, pady=5, sticky="ew")
+       
         
         
 
