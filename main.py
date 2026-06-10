@@ -17,15 +17,9 @@ class FontSize:
     Text = 11
     """11"""
 
-class ColourScheme: # for colours that won't change throughout whole app
-    #temporary (looks very bad)
-    Primary = "#34c9c0"
-    Secondary = "#dee60e"
-    Foreground = "#3c807e"
-    Background = "#000000"
-    Text = "#ececec"  
-    Button = "#3b7472"
-    ButtonHover = "#40a3a0"
+ColourScheme = Account.Theme()
+# for colours that won't change throughout whole app
+#temporary (looks very bad)
 
 class VideoWidget(ctk.CTkFrame):
     def __init__(self, image,  *args, **kwargs):
