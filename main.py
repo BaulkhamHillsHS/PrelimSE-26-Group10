@@ -4,6 +4,8 @@ import customtkinter as ctk
 import tkinter as tk
 import accountmodule as Account
 from videomodule import movies
+import pyotp
+import time
 
 class FontSize: 
     # so that we can easily change formatting
@@ -83,10 +85,17 @@ class LoginPage(ctk.CTkFrame):
 
     def Login(self, email, password):
         
-        if email == "test@gmail.com" and password == "abc123":        
-            print("Logged in")
+        key = pyotp.random_base32()
+        self.totp = pyotp.TOTP(key)
+        print(self.totp.now())
+        
+        if email == "devashreepatel95@gmail.com" and password == "abc123":        
+            input_code = input("Enter 2FA Code: ")
+            self.totp.verify(input_code)
+                         
         else:
             print("Incorrect email or password")
+        
    
     
     def _build_ui(self):
