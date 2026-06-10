@@ -79,8 +79,7 @@ class SubscriptionManagementPage(StandardPage):
 
 class LoginPage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
-        super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
-        
+        super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
 
     def Login(self, usercode):
@@ -149,30 +148,47 @@ class PaymentPlanPage(ctk.CTkFrame):
     def _build_ui(self):
         pass
 
+# used to map a string to a class idk actually this seems useless
+pages : dict = {"StandardPage": StandardPage, 
+                "VideoPage": VideoPage, 
+                "SubscriptionManagementPage": SubscriptionManagementPage, 
+                "LoginPage": LoginPage, 
+                "PaymentPlanPage": PaymentPlanPage}
+
 class StreamingApp(ctk.CTk):
     Title = "App"
     def __init__(self):
         super().__init__()
-        self.pages = {}
         self.currentpage: ctk.CTkFrame = None
-        self.account = None
-        self.profile = None
+        self.account : Account.Account = None
+        self.profile : Account.Profile = None
         
         self.grid_rowconfigure(0,weight=1)
         self.grid_columnconfigure(0,weight=1)
     
     def _change_page(self, newpage):
-        if self.currentpage:
-            self.currentpage.grid_forget()
-        self.currentpage = self.pages[newpage]
-        self.currentpage.grid(row=0, column=0, sticky="nesw")
+        if pages.get(newpage):
+            # undisplay the previous page
+            if self.currentpage:
+                # deletes the old page
+                self.currentpage.destroy()
+                
+            # create a new page
+            self.currentpage = pages[newpage](self)
+            
+            # display the new page
+            self.currentpage.grid(row=0, column=0, sticky="nesw")
+        else:
+            raise KeyError(f"Page {newpage} does not exist")
     
     def _test_page(self, page):
         """
         See what a page looks like (for testing only)
         """
         if self.currentpage:
-           self.currentpage.grid_forget()
+            self.currentpage.grid_forget()
+            self.currentpage.destroy()
+           
         self.currentpage = page
         self.currentpage.grid(row=0, column=0, sticky="nesw")
         

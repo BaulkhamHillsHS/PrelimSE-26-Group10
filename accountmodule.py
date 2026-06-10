@@ -28,11 +28,14 @@ class Profile:
     def save_to_csv(self):
         fields = ["accountemail", "profilename", "age", "watchhistory"]
         data = []
+        
+        # copy all the file information into data
         with open("profiles.csv", mode="r", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 data.append(row)
-                
+        
+        # search for the profile and change that row in the data
         for row in data:
             if (row["accountemail"].strip() == self._account._email and 
                 row["profilename"].strip() == self._profilename):
@@ -40,6 +43,7 @@ class Profile:
                 row["watchhistory"] = "/".join(self._history)
                 break
         
+        # rewrite the file with the changed data
         with open("profiles.csv", mode="w", newline="") as f:
             reader = csv.DictWriter(f, fields)
             reader.writeheader()
@@ -50,8 +54,12 @@ class Profile:
         with open("profiles.csv", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
+                
+                # if profile details match
                 if (row["accountemail"].strip() == self._account._email 
                 and row["profilename"].strip() == self._profilename):
+                    
+                    # get the age and history
                     self._age = row["age"]
                     self._history = row["watchhistory"].split("/")
                     break
@@ -65,16 +73,19 @@ class Account:
         self._password = password
         
     def create_profile(self):
-        pass
+        pass #probably wont need this
             
     def save_to_csv(self):
         fields = ["accountname", "email", "password", "plan", "profiles"]
         data = []
+        
+        # copy all accounts.csv data into data
         with open("accounts.csv", mode="r", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 data.append(row)
                 
+        # search for the row of the account and modify the data there
         for row in data:
             if (row["email"].strip() == self._email and 
                 row["password"] == self._password):
@@ -83,6 +94,7 @@ class Account:
                 row["profiles"] = "/".join(self._profiles)
                 break
         
+        # rewrite the file with the new data
         with open("accounts.csv", mode="w", newline="") as f:
             reader = csv.DictWriter(f, fields)
             reader.writeheader()
