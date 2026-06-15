@@ -21,39 +21,87 @@ class Profile:
         self._account: Account = account
         self._profilename = name
         self._age = 0
-        self._history = []
+        self._history: list = []
         self._theme = Theme()
         self.load_from_csv()
 
     def save_to_csv(self):
         fields = ["accountemail", "profilename", "age", "watchhistory"]
-        with open("profiles.csv") as f:
-            pass
-    
-    def load_from_csv(self):
-        with open("profiles.csv") as f:
+        data = []
+        
+        # copy all the file information into data
+        with open("profiles.csv", mode="r", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                if row["accountemail"].strip() == self._account._email and row["profilename"].strip() == self._profilename:
+                data.append(row)
+        
+        # search for the profile and change that row in the data
+        for row in data:
+            if (row["accountemail"].strip() == self._account._email and 
+                row["profilename"].strip() == self._profilename):
+                row["age"] = self._age
+                row["watchhistory"] = "/".join(self._history)
+                break
+        
+        # rewrite the file with the changed data
+        with open("profiles.csv", mode="w", newline="") as f:
+            reader = csv.DictWriter(f, fields)
+            reader.writeheader()
+            reader.writerows(data)
+            
+    
+    def load_from_csv(self):
+        with open("profiles.csv", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                
+                # if profile details match
+                if (row["accountemail"].strip() == self._account._email 
+                and row["profilename"].strip() == self._profilename):
+                    
+                    # get the age and history
                     self._age = row["age"]
                     self._history = row["watchhistory"].split("/")
                     break
 
 class Account:
     def __init__(self, email, password):
+        self.name = ""
         self._email = email
-        self._plan = None
+        self._plan = ""
         self._profiles = []
         self._password = password
         
     def create_profile(self):
-        pass
+        pass #probably wont need this
             
     def save_to_csv(self):
         fields = ["accountname", "email", "password", "plan", "profiles"]
+        data = []
+        
+        # copy all accounts.csv data into data
+        with open("accounts.csv", mode="r", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                data.append(row)
+                
+        # search for the row of the account and modify the data there
+        for row in data:
+            if (row["email"].strip() == self._email and 
+                row["password"] == self._password):
+                row["accountname"] = self.name
+                row["plan"] = self._plan
+                row["profiles"] = "/".join(self._profiles)
+                break
+        
+        # rewrite the file with the new data
+        with open("accounts.csv", mode="w", newline="") as f:
+            reader = csv.DictWriter(f, fields)
+            reader.writeheader()
+            reader.writerows(data)
     
     def load_from_csv(self):
-        with open("accounts.csv") as f:
+        with open("accounts.csv", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row["email"].strip() == self._email and row["password"].strip() == self._password:
@@ -68,5 +116,12 @@ def login(email, password):
         return testLogin
     return False
 
-if __name__ == "__main__":
+testing = False
+if __name__ == "__main__" and testing:
     print(login("ryan.dunne9@det.nsw.edu.au", "Baulko11!!"))
+    
+    my = login("ryan.dunne9@det.nsw.edu.au", "Baulko11!!")
+    prof = Profile(my, "profileone")
+    prof._history = ["abcd", "123"]
+    prof.save_to_csv()
+            
