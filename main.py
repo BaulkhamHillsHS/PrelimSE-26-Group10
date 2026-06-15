@@ -84,7 +84,7 @@ class LoginPage(ctk.CTkFrame):
     
     def goToStreamingApp(self, userAccount):
         ##DOESNT WORK RIGHT NOW - WILL FIX  
-        app._change_page(ProfilePage(app))
+        app._change_page("ProfilePage")
         
     
     def twoFactAuth(self, userAccount):
@@ -111,16 +111,13 @@ class LoginPage(ctk.CTkFrame):
                 self.goToStreamingApp(userAccount)
 
             
-    def Login(self, email, password):
-        
+    def Login(self, email, password):  
         #uses  account modules login function to check if account exists
         if AccMod.login(email, password) != False:
             self.twoFactAuth(AccMod.login(email, password))                        
         else:
             print("Incorrect email or password")
         
-    def check_email_password(self):
-        pass
     
     def _build_ui(self):
         self.grid_columnconfigure((0,1,2), weight=1)
@@ -154,7 +151,7 @@ class PaymentPlanPage(ctk.CTkFrame):
     def _build_ui(self):
         pass
 
-class ProfilePage():
+class ProfilePage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
         
@@ -172,7 +169,8 @@ pages : dict = {"StandardPage": StandardPage,
                 "VideoPage": VideoPage, 
                 "SubscriptionManagementPage": SubscriptionManagementPage, 
                 "LoginPage": LoginPage, 
-                "PaymentPlanPage": PaymentPlanPage}
+                "PaymentPlanPage": PaymentPlanPage,
+                "ProfilePage": ProfilePage}
 
 class StreamingApp(ctk.CTk):
     Title = "App"
