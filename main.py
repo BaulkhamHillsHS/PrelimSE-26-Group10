@@ -1,12 +1,11 @@
 # main file for displaying GUI components
-import csv
 import customtkinter as ctk
 import tkinter as tk
-import accountmodule as Account
+import accountmodule as AccMod
 from videomodule import movies
 import pyotp
 import time
-
+import smtplib
 
 
 class FontSize: 
@@ -109,44 +108,54 @@ class LoginPage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
+    
+    def goToStreamingApp(self, userAccount):
+        ##DOESNT WORK RIGHT NOW - WILL FIX  
+        app._change_page("ProfilePage")
+        
+    
+    def twoFactAuth(self, userAccount, user_email):
+        
+        for widget in self.winfo_children():
+                widget.destroy()   
+        self.grid_columnconfigure((0,1,2), weight=1)
+        self.grid_rowconfigure((0, 1, 2, 3), weight=1)
+        
+        #build page elements
+        self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
+        self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
+            
+        self.label = ctk.CTkLabel(self, text="A six digit code has been sent to your email: ", text_color=ColourScheme.Text, font=("arial", 20))
+        self.label.grid(row=1, column=1, padx=20, pady=5, sticky="ew")
+        
+        self.code_entry = ctk.CTkEntry(self, placeholder_text="XXXXXX", height=30)
+        self.code_entry.grid(row=2, column=1, padx=20, pady=5, sticky="ew")
+    
+        self.submit_button = ctk.CTkButton(self, text="Submit", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command= lambda: checkUsercode(self.code_entry.get(), code))
+        self.submit_button.grid(row=3, column=1, padx=40, pady=5, sticky="ew")
 
-    def Login(self, usercode, loginaccount):
-        if usercode == "123456":
-            print("YUUH")
-            self.master.account = loginaccount
-            self.master._change_page("ProfilePage")
-        #still hardcoded values not fully functional yet
+        #send email
+        email = "devashreepatel95@gmail.com" #usually company email
+        receiver_email = user_email
+        code = str(123456)
+        email_message = f"Subject: APPNAME STREAMING SERVICE SIX-DIGIT CODE \n\n Your one time six digit code is: {code} This code expires in 15 minutes."
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(email,"luruzlexucsjtmjg")
+        server.sendmail(email, receiver_email, email_message)
+
+        def checkUsercode(usercode, code):    
+            if usercode == code:
+                self.goToStreamingApp(userAccount)
+
             
-    def twoFactAuth(self, email, password):
-        
-        loginaccount = Account.login(email, password)
-        if loginaccount:        
-            
-            for widget in self.winfo_children():
-                widget.destroy()
-            
-            self.grid_columnconfigure((0,1,2), weight=1)
-            self.grid_rowconfigure((0, 1, 2, 3), weight=1)
-            
-            self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
-            self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
-                   
-            self.label = ctk.CTkLabel(self, text="A six digit code has been sent to your email: ", text_color=ColourScheme.Text, font=("arial", 20))
-            self.label.grid(row=1, column=1, padx=20, pady=5, sticky="ew")
-            
-            self.code_entry = ctk.CTkEntry(self, placeholder_text="XXXXXX", height=30)
-            self.code_entry.grid(row=2, column=1, padx=20, pady=5, sticky="ew")
-           
-            self.submit_button = ctk.CTkButton(self, text="Submit", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, 
-                                               command= lambda: self.Login(self.code_entry.get(), loginaccount))
-            self.submit_button.grid(row=3, column=1, padx=40, pady=5, sticky="ew")
-        
-        
-                         
+    def Login(self, email, password):  
+        #uses  account modules login function to check if account exists
+        if AccMod.login(email, password) != False:
+            self.twoFactAuth(AccMod.login(email, password), email)                        
         else:
             print("Incorrect email or password")
         
-   
     
     def _build_ui(self):
         self.grid_columnconfigure((0,1,2), weight=1)
@@ -167,9 +176,21 @@ class LoginPage(ctk.CTkFrame):
         self.password_entry = ctk.CTkEntry(self, placeholder_text="Enter your password", height=30)
         self.password_entry.grid(row=4, column=1, padx=20, pady=5, sticky="ew")
         
-        self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, 
-                                          command=lambda: self.twoFactAuth(self.email_entry.get(), self.password_entry.get()))
+        self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=lambda: self.Login(self.email_entry.get(), self.password_entry.get()))
         self.login_button.grid(row=5, column=1, padx=40, pady=5, sticky="ew")
+
+class ProfilePage(ctk.CTkFrame):
+    def __init__(self, *args, **kwargs):
+        super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
+        
+        self._build_ui()
+        
+    def _build_ui(self):
+        self.grid_columnconfigure((0,1,2), weight=1)
+        self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
+        
+        self.label = ctk.CTkLabel(self, text="Profile Page", text_color=ColourScheme.Text, font=("arial", 40))
+        self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
 
 # used to map a string to a class idk actually this seems useless
 pages : dict = {"StandardPage": StandardPage, 
@@ -177,7 +198,9 @@ pages : dict = {"StandardPage": StandardPage,
                 "VideoPage": VideoPage,
                 "BrowsingPage": BrowsingPage, 
                 "SubscriptionManagementPage": SubscriptionManagementPage, 
-                "LoginPage": LoginPage}
+                "LoginPage": LoginPage, 
+                "PaymentPlanPage": PaymentPlanPage,
+                "ProfilePage": ProfilePage}
 
 class StreamingApp(ctk.CTk):
     Title = "App"
@@ -215,6 +238,9 @@ class StreamingApp(ctk.CTk):
            
         self.currentpage = page
         self.currentpage.grid(row=0, column=0, sticky="nesw")
+        
+
+
         
 
         
