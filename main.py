@@ -38,16 +38,17 @@ class VideoWidget(ctk.CTkFrame):
         pass
 
 class ProfileWidget(ctk.CTkFrame):
-    def __init__(self, master, *args, **kwargs):
-        super().__init__()
-        self.name = ""
+    def __init__(self, master, name, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+        self._build_ui()
+        self.name = name
     
     def _build_ui():
         pass
 
 class ProfileEditor(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(*args, **kwargs)
     
     def _build_ui(self):
         pass # name, movie rating
@@ -178,6 +179,8 @@ class ProfilePage(ctk.CTkFrame):
         self._build_ui()
         
     def _build_ui(self):
+        account = self.master.account
+        profiles = account._profiles
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
