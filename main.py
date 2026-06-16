@@ -7,6 +7,8 @@ from videomodule import movies
 import pyotp
 import time
 
+
+
 class FontSize: 
     # so that we can easily change formatting
     # use variables (like FontSize.Title) instead of 16
@@ -19,12 +21,13 @@ class FontSize:
 
 class ColourScheme: # for colours that won't change throughout whole app
     #temporary (looks very bad)
-    Primary = "#34c9c0"
+    Primary = "#2d8a1f"
     Secondary = "#dee60e"
-    Foreground = "#3c807e"
+    Foreground = "#557c45"
     Background = "#000000"
-    Text = "#ececec"  
-    Button = "#3b7472"
+    
+    Text = "#254d11"  
+    Button = "#EF8606"
     ButtonHover = "#40a3a0"
 
 class VideoWidget(ctk.CTkFrame):
@@ -35,6 +38,13 @@ class VideoWidget(ctk.CTkFrame):
     def _build_ui(self):
         pass
 
+class ProfileWidget(ctk.CTkFrame):
+    def __init__(self, master, *args, **kwargs):
+        super().__init__()
+        self.name = ""
+    
+    def _build_ui():
+        pass
 
 class StandardPage(ctk.CTkFrame):
     """
@@ -50,6 +60,23 @@ class StandardPage(ctk.CTkFrame):
         for child in self.winfo_children():
             pass
 
+class ProfileEditor(ctk.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+    
+    def _build_ui(self):
+        pass # name, movie rating
+
+class ProfilePage(ctk.CTkFrame):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
+        self._build_ui()
+        
+    def _build_ui(self):
+        profiles = self.master.account._profiles
+        for profile in profiles:
+            pass
+    
 class VideoPage(StandardPage):
     """
     Screen to display when selecting a movie/show
@@ -72,7 +99,8 @@ class VideoPage(StandardPage):
         )
         return m_img
         
-        
+class BrowsingPage(StandardPage):
+    pass
 
 class SubscriptionManagementPage(StandardPage):
     pass
@@ -82,14 +110,17 @@ class LoginPage(ctk.CTkFrame):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
 
-    def Login(self, usercode):
+    def Login(self, usercode, loginaccount):
         if usercode == "123456":
             print("YUUH")
+            self.master.account = loginaccount
+            self.master._change_page("ProfilePage")
         #still hardcoded values not fully functional yet
             
     def twoFactAuth(self, email, password):
         
-        if email == "devashreepatel95@gmail.com" and password == "abc123":        
+        loginaccount = Account.login(email, password)
+        if loginaccount:        
             
             for widget in self.winfo_children():
                 widget.destroy()
@@ -106,7 +137,8 @@ class LoginPage(ctk.CTkFrame):
             self.code_entry = ctk.CTkEntry(self, placeholder_text="XXXXXX", height=30)
             self.code_entry.grid(row=2, column=1, padx=20, pady=5, sticky="ew")
            
-            self.submit_button = ctk.CTkButton(self, text="Submit", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command= lambda: self.Login(self.code_entry.get()))
+            self.submit_button = ctk.CTkButton(self, text="Submit", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, 
+                                               command= lambda: self.Login(self.code_entry.get(), loginaccount))
             self.submit_button.grid(row=3, column=1, padx=40, pady=5, sticky="ew")
         
         
@@ -135,25 +167,17 @@ class LoginPage(ctk.CTkFrame):
         self.password_entry = ctk.CTkEntry(self, placeholder_text="Enter your password", height=30)
         self.password_entry.grid(row=4, column=1, padx=20, pady=5, sticky="ew")
         
-        self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=lambda: self.twoFactAuth(self.email_entry.get(), self.password_entry.get()))
+        self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, 
+                                          command=lambda: self.twoFactAuth(self.email_entry.get(), self.password_entry.get()))
         self.login_button.grid(row=5, column=1, padx=40, pady=5, sticky="ew")
-       
-        
-        
-
-class PaymentPlanPage(ctk.CTkFrame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
-    def _build_ui(self):
-        pass
 
 # used to map a string to a class idk actually this seems useless
 pages : dict = {"StandardPage": StandardPage, 
-                "VideoPage": VideoPage, 
+                "ProfilePage": ProfilePage,
+                "VideoPage": VideoPage,
+                "BrowsingPage": BrowsingPage, 
                 "SubscriptionManagementPage": SubscriptionManagementPage, 
-                "LoginPage": LoginPage, 
-                "PaymentPlanPage": PaymentPlanPage}
+                "LoginPage": LoginPage}
 
 class StreamingApp(ctk.CTk):
     Title = "App"

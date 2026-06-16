@@ -105,9 +105,10 @@ class Account:
             reader = csv.DictReader(f)
             for row in reader:
                 if row["email"].strip() == self._email and row["password"].strip() == self._password:
+                    self.name = row["accountname"]
                     self._plan = row["plan"]
                     self._profiles = row["profiles"].split("/")
-                return True
+                    return True
         return False # no account found
 
 def login(email, password):
