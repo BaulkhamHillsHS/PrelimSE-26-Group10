@@ -1,11 +1,12 @@
 # main file for displaying GUI components
-import csv
 import customtkinter as ctk
 import tkinter as tk
 import accountmodule as AccMod
 from videomodule import movies
 import pyotp
 import time
+import smtplib
+
 
 class FontSize: 
     # so that we can easily change formatting
@@ -87,13 +88,14 @@ class LoginPage(ctk.CTkFrame):
         app._change_page("ProfilePage")
         
     
-    def twoFactAuth(self, userAccount):
+    def twoFactAuth(self, userAccount, user_email):
         
         for widget in self.winfo_children():
                 widget.destroy()   
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3), weight=1)
         
+        #build page elements
         self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
         self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
             
@@ -103,18 +105,28 @@ class LoginPage(ctk.CTkFrame):
         self.code_entry = ctk.CTkEntry(self, placeholder_text="XXXXXX", height=30)
         self.code_entry.grid(row=2, column=1, padx=20, pady=5, sticky="ew")
     
-        self.submit_button = ctk.CTkButton(self, text="Submit", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command= lambda: checkUsercode(self.code_entry.get()))
+        self.submit_button = ctk.CTkButton(self, text="Submit", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command= lambda: checkUsercode(self.code_entry.get(), code))
         self.submit_button.grid(row=3, column=1, padx=40, pady=5, sticky="ew")
 
-        def checkUsercode(usercode):
-            if usercode == "123456":
+        #send email
+        email = "devashreepatel95@gmail.com" #usually company email
+        receiver_email = user_email
+        code = str(123456)
+        email_message = f"Subject: APPNAME STREAMING SERVICE SIX-DIGIT CODE \n\n Your one time six digit code is: {code} This code expires in 15 minutes."
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(email,"luruzlexucsjtmjg")
+        server.sendmail(email, receiver_email, email_message)
+
+        def checkUsercode(usercode, code):    
+            if usercode == code:
                 self.goToStreamingApp(userAccount)
 
             
     def Login(self, email, password):  
         #uses  account modules login function to check if account exists
         if AccMod.login(email, password) != False:
-            self.twoFactAuth(AccMod.login(email, password))                        
+            self.twoFactAuth(AccMod.login(email, password), email)                        
         else:
             print("Incorrect email or password")
         
