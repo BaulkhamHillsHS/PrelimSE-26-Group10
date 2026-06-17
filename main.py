@@ -76,15 +76,33 @@ class VideoPage(StandardPage):
         
 
 class SubscriptionManagementPage(StandardPage):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
+        self._build_ui()
+    def _build_ui(self):
+        self.grid_columnconfigure((0,1,2), weight=1)
+        self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
+        
+        self.label = ctk.CTkLabel(self, text="Manage Subscription", text_color=ColourScheme.Text, font=("arial", 40))
+        self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
+        
+        def button_event():
+            app._change_page("ProfilePage")
 
+        self.return_button = ctk.CTkButton(app, text="Return to Profiles", command=button_event)
+        self.return_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
+
+        account_plan = "Current Account Plan: premium"
+        self.current_acc_plan = ctk.CTkLabel(self, text=account_plan, text_color=ColourScheme.Text, font=("arial", 20))
+        self.current_acc_plan.grid(row=2, column=1, padx=20, pady=30, sticky="ew")
+
+    
 class LoginPage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
     
     def goToStreamingApp(self, userAccount):
-        ##DOESNT WORK RIGHT NOW - WILL FIX  
         app._change_page("ProfilePage")
         
     
@@ -116,7 +134,9 @@ class LoginPage(ctk.CTkFrame):
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(email,"luruzlexucsjtmjg")
-        server.sendmail(email, receiver_email, email_message)
+        # the line below is temporarily disabled as I do not want to send 5 million emails
+        # to random accounts while testing out other functions!
+        #server.sendmail(email, receiver_email, email_message)
 
         def checkUsercode(usercode, code):    
             if usercode == code:
@@ -175,6 +195,18 @@ class ProfilePage(ctk.CTkFrame):
         
         self.label = ctk.CTkLabel(self, text="Profile Page", text_color=ColourScheme.Text, font=("arial", 40))
         self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
+        
+        def manageSub():
+            app._change_page("SubscriptionManagementPage")
+
+        self.sub_man_button = ctk.CTkButton(app, text="Manage Subscription", command=manageSub)
+        self.sub_man_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
+
+        def logOut():
+            app._change_page("LoginPage")
+        
+        self.log_out_button = ctk.CTkButton(app, text="Log Out", fg_color="red", command=logOut)
+        self.log_out_button.grid(row=5, column=2, padx=20, pady=30, sticky="sw")
 
 # used to map a string to a class idk actually this seems useless
 pages : dict = {"StandardPage": StandardPage, 
