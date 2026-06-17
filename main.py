@@ -20,12 +20,13 @@ class FontSize:
 
 class ColourScheme: # for colours that won't change throughout whole app
     #temporary (looks very bad)
-    Primary = "#34c9c0"
+    Primary = "#2d8a1f"
     Secondary = "#dee60e"
-    Foreground = "#3c807e"
+    Foreground = "#557c45"
     Background = "#000000"
-    Text = "#ececec"  
-    Button = "#3b7472"
+    
+    Text = "#254d11"  
+    Button = "#EF8606"
     ButtonHover = "#40a3a0"
 
 class VideoWidget(ctk.CTkFrame):
@@ -36,7 +37,22 @@ class VideoWidget(ctk.CTkFrame):
     def _build_ui(self):
         pass
 
+class ProfileWidget(ctk.CTkFrame):
+    def __init__(self, master, name, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+        self._build_ui()
+        self.name = name
+    
+    def _build_ui():
+        pass
 
+class ProfileEditor(ctk.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    def _build_ui(self):
+        pass # name, movie rating
+    
 class StandardPage(ctk.CTkFrame):
     """
     Parent class for pages that can be accessed when in a profile
@@ -47,7 +63,8 @@ class StandardPage(ctk.CTkFrame):
     def _build_ui(self):
         pass
 
-    def _apply_theme(self, theme):
+    def _apply_theme(self, theme): 
+        #probably won't need this since i don't think we're adding themes
         for child in self.winfo_children():
             pass
 
@@ -73,7 +90,8 @@ class VideoPage(StandardPage):
         )
         return m_img
         
-        
+class BrowsingPage(StandardPage):
+    pass
 
 class SubscriptionManagementPage(StandardPage):
     def __init__(self, *args, **kwargs):
@@ -103,6 +121,8 @@ class LoginPage(ctk.CTkFrame):
         self._build_ui()
     
     def goToStreamingApp(self, userAccount):
+        ##DOESNT WORK RIGHT NOW - WILL FIX  
+        self.master.account = userAccount
         app._change_page("ProfilePage")
         
     
@@ -145,8 +165,9 @@ class LoginPage(ctk.CTkFrame):
             
     def Login(self, email, password):  
         #uses  account modules login function to check if account exists
-        if AccMod.login(email, password) != False:
-            self.twoFactAuth(AccMod.login(email, password), email)                        
+        userAccount = AccMod.login(email, password)
+        if userAccount != False:
+            self.twoFactAuth(userAccount, email)                        
         else:
             print("Incorrect email or password")
         
@@ -172,24 +193,15 @@ class LoginPage(ctk.CTkFrame):
         
         self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=lambda: self.Login(self.email_entry.get(), self.password_entry.get()))
         self.login_button.grid(row=5, column=1, padx=40, pady=5, sticky="ew")
-       
-        
-        
-
-class PaymentPlanPage(ctk.CTkFrame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
-    def _build_ui(self):
-        pass
 
 class ProfilePage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
-        
         self._build_ui()
         
     def _build_ui(self):
+        account = self.master.account
+        profiles = account._profiles
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
@@ -210,10 +222,11 @@ class ProfilePage(ctk.CTkFrame):
 
 # used to map a string to a class idk actually this seems useless
 pages : dict = {"StandardPage": StandardPage, 
-                "VideoPage": VideoPage, 
+                "ProfilePage": ProfilePage,
+                "VideoPage": VideoPage,
+                "BrowsingPage": BrowsingPage, 
                 "SubscriptionManagementPage": SubscriptionManagementPage, 
                 "LoginPage": LoginPage, 
-                "PaymentPlanPage": PaymentPlanPage,
                 "ProfilePage": ProfilePage}
 
 class StreamingApp(ctk.CTk):
@@ -221,8 +234,8 @@ class StreamingApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.currentpage: ctk.CTkFrame = None
-        self.account : Account.Account = None
-        self.profile : Account.Profile = None
+        self.account : AccMod.Account = None
+        self.profile : AccMod.Profile = None
         
         self.grid_rowconfigure(0,weight=1)
         self.grid_columnconfigure(0,weight=1)

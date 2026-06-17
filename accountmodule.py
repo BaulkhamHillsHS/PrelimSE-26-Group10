@@ -72,8 +72,16 @@ class Account:
         self._profiles = []
         self._password = password
         
-    def create_profile(self):
-        pass #probably wont need this
+    def create_profile(self, name, age):
+        fields = ["accountemail", "profilename", "age", "watchhistory"]
+        if name in self._profiles:
+            with open("profiles.csv", mode="a", newline="") as f:
+                writer = csv.DictWriter(f, fields)
+                writer.writerow({
+                    "accountemail": self._email,
+                    "profilename": name,
+                    "age": age
+                })
             
     def save_to_csv(self):
         fields = ["accountname", "email", "password", "plan", "profiles"]
@@ -105,6 +113,7 @@ class Account:
             reader = csv.DictReader(f)
             for row in reader:
                 if row["email"].strip() == self._email and row["password"].strip() == self._password:
+                    self.name = row["accountname"]
                     self._plan = row["plan"]
                     self._profiles = row["profiles"].split("/")
                     return True
