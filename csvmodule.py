@@ -39,16 +39,16 @@ def find_row(filename, fields_to_search: list, data: dict):
 
 def edit_row(filename, fields_to_search: list, data: dict, newdata: dict):
     if filename == "profiles.csv":
-        f = open("profiles.csv", mode="r+", newline="")
+        readf = open("profiles.csv", mode="r", newline="")
         fieldnames = ["accountemail", "profilename", "age", "watchhistory"]
     elif filename == "accounts.csv":
-        f = open("accounts.csv", mode="r+", newline="")
+        readf = open("accounts.csv", mode="r", newline="")
         fieldnames = ["accountname", "email", "password", "plan", "profiles"]
     else:
         print("Invalid file name")
         return False
     
-    reader = csv.DictReader(f)
+    reader = csv.DictReader(readf)
     filedata = []
     for row in reader: #copy the file into a list
         found_row = True
@@ -67,24 +67,30 @@ def edit_row(filename, fields_to_search: list, data: dict, newdata: dict):
         else: #append as normal
             filedata.append(row)
     
+    readf.close()
     
-    writer = csv.DictWriter(f, fieldnames)
+    if filename == "profiles.csv":
+        writef = open("profiles.csv", mode="w", newline="")
+        fieldnames = ["accountemail", "profilename", "age", "watchhistory"]
+    elif filename == "accounts.csv":
+        writef = open("accounts.csv", mode="w", newline="")
+        fieldnames = ["accountname", "email", "password", "plan", "profiles"]
+    
+    writer = csv.DictWriter(writef, fieldnames)
     writer.writeheader()
     writer.writerows(filedata)
-    f.close()
+    writef.close()
 
 def delete_row(filename, fields_to_search: list, data: dict):
     if filename == "profiles.csv":
-        f = open("profiles.csv", mode="r+", newline="")
-        fieldnames = ["accountemail", "profilename", "age", "watchhistory"]
+        readf = open("profiles.csv", mode="r", newline="")
     elif filename == "accounts.csv":
-        f = open("accounts.csv", mode="r+", newline="")
-        fieldnames = ["accountname", "email", "password", "plan", "profiles"]
+        readf = open("accounts.csv", mode="r", newline="")
     else:
         print("Invalid file name")
         return False
     
-    reader = csv.DictReader(f)
+    reader = csv.DictReader(readf)
     filedata = []
     for row in reader: #copy the file into a list
         found_row = True
@@ -96,10 +102,19 @@ def delete_row(filename, fields_to_search: list, data: dict):
         if not found_row: #append non-deleted row
             filedata.append(row)
     
-    writer = csv.DictWriter(f, fieldnames)
+    readf.close()
+    
+    if filename == "profiles.csv":
+        writef = open("profiles.csv", mode="w", newline="")
+        fieldnames = ["accountemail", "profilename", "age", "watchhistory"]
+    elif filename == "accounts.csv":
+        writef = open("accounts.csv", mode="w", newline="")
+        fieldnames = ["accountname", "email", "password", "plan", "profiles"]
+    
+    writer = csv.DictWriter(writef, fieldnames)
     writer.writeheader()
     writer.writerows(filedata)
-    f.close()
+    writef.close()
 
 def append_row(filename, data: dict):
     if filename == "profiles.csv":
