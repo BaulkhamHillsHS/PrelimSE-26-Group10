@@ -28,20 +28,22 @@ class Profile:
 
     def update_details(self, newname, newage):
         newname = newname.strip()
-        if newage <= 0:
+        if int(newage) <= 0:
             return "Age too young"
         if len(newname) <= 1:
             return "Name too short"
         
-        edit_row("accounts.csv", 
+        edit_row("profiles.csv", 
                  ["accountemail", "profilename"], 
                  {"accountemail" : self._account._email, "profilename": self._profilename}, 
                  {"profilename": newname, "age": newage})
+        self._account._profilenames[self._account._profilenames.index(self._profilename)] = newname
+        self._account.save_to_csv()
         self._profilename = newname
         self._age = newage
     
     def save_to_csv(self):
-        edit_row("accounts.csv", 
+        edit_row("profiles.csv", 
                  ["accountemail", "profilename"], 
                  {"accountemail" : self._account._email, "profilename": self._profilename}, 
                  {"watchhistory": "/".join(self._history)})
@@ -67,6 +69,7 @@ class Account:
         self._password : str = password
         
     def create_profile(self, name, age):
+        # not bothered to rewrite it with csvmodule
         fields = ["accountemail", "profilename", "age", "watchhistory"]
         if name in self._profilenames:
             with open("profiles.csv", mode="a", newline="") as f:
