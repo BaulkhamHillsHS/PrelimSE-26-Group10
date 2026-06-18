@@ -158,11 +158,9 @@ class LoginPage(ctk.CTkFrame):
         self._build_ui()
     
     def goToStreamingApp(self, userAccount):
-        ##DOESNT WORK RIGHT NOW - WILL FIX  
-        #idk it seems pretty working to me
         self.master.account = userAccount
         app._change_page("ProfilePage")
-        
+            
     
     def twoFactAuth(self, userAccount, user_email):
         
@@ -211,6 +209,7 @@ class LoginPage(ctk.CTkFrame):
         
     
     def _build_ui(self):
+        self.window.geometry
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
