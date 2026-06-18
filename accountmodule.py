@@ -89,7 +89,8 @@ class Account:
             delete_row("profiles.csv", ["accountemail", "profilename"],
                     {"accountemail": self._email,
                         "profilename": profilename})
-            self._profilenames.remove("profilename")
+            self._profilenames.remove(profilename)
+            self.save_to_csv()
     
     def save_to_csv(self):
         edit_row("accounts.csv", 

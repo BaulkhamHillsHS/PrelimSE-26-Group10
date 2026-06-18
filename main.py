@@ -191,11 +191,12 @@ class ProfileEditor(ctk.CTkToplevel):
                 elif int(ageentry) >= 999:
                     error += "Too old "
         
-        if error != "":
+        if ageentry == "DELETE" and nameentry == "DELETE":
+            self.account.delete_profile(self.profilename)
+            self.destroy()
+        elif error != "":
             error = "Error: " + error
             self.errorlabel.configure(text=error)
-        elif ageentry == "DELETE" and nameentry == "DELETE":
-            self.account.delete_profile(self.profilename)
         else:
             if nameentry != "" and ageentry != "":
                 self.profile.update_details(nameentry, ageentry)
