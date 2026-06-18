@@ -354,7 +354,7 @@ class LoginPage(ctk.CTkFrame):
         
     
     def _build_ui(self):
-        self.window.geometry
+        #self.window.geometry
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
