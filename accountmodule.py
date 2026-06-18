@@ -53,8 +53,8 @@ class Profile:
                         ["accountemail", "profilename"],
                         {"accountemail": self._account._email, "profilename": self._profilename})
         if data:
-            self.age = data["age"]
-            self.watchhistory = data["watchhistory"].split("/")
+            self._age = data["age"]
+            self._history = data["watchhistory"].split("/")
             return True
         else:
             print("profile not found")
