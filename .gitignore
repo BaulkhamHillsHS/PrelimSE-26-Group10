@@ -1,2 +1,4 @@
 __pycache__/accountmodule.cpython-313.pyc
 __pycache__/videomodule.cpython-313.pyc
+__pycache__/csvmodule.cpython-313.pyc
+.gitignore

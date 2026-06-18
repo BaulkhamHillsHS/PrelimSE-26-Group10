@@ -8,30 +8,20 @@ import time
 import smtplib
 from PIL import Image #used for profile images
 
-class Font:
-    Title = ""
-    Subtitle = ""
-    Text = ""
-
-class FontSize: 
-    # so that we can easily change formatting
-    # use variables (like FontSize.Title) instead of 16
-    Title = 16
-    """16"""
-    Subtitle = 14
-    """14"""
-    Text = 11
-    """11"""
+class FontStyle:
+    Title = ("Arial", 40)
+    Subtitle = ("Arial", 20)
+    Text = ("Arial", 14)
 
 class ColourScheme: # for colours that won't change throughout whole app
     #temporary (looks very bad)
     Primary = "#2d8a1f"
     Secondary = "#dee60e"
     Foreground = "#557c45"
-    Background = "#FDD973"
+    Background = "#000000"
     
     Text = "#dddddd"  
-    Text = "#1e3712"  
+    Red = "red"
     Button = "#EF8606"
     ButtonHover = "#40a3a0"
 
@@ -83,13 +73,167 @@ class ProfileWidget(ctk.CTkFrame):
         self.profilebutton.grid(column=0,row=0)
 
 # ctktoplevels? what do i even call this
-class ProfileEditor(ctk.CTkToplevel):
-    def __init__(self, *args, **kwargs):
+class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
+    def __init__(self, profilepage, account, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.geometry("400x400")
+        self._fg_color = ColourScheme.Background
         self.focus()
+        self.title("Create Profile")
+        
+        self.profilepage: ProfilePage = profilepage
+        self.account: AccMod.Account = account
+        self._build_ui()
+    
+    def _create_profile(self):
+        ageentry = self.ageentry.get()
+        nameentry = self.nameentry.get()
+        error = ""
+        
+        if nameentry:
+            if nameentry in self.account._profilenames:
+                    error += "Name already in use "
+            if len(nameentry) <= 1:
+                error += "Name too short "
+            elif len(nameentry) > 12:
+                error += "Name too long "
+            else:
+                for letter in "/":
+                    if letter in nameentry:
+                        error += "Invalid character (" + letter + ") "
+        else:
+            error += "No name given "
+        
+        if ageentry:
+            if not ageentry.isdigit():
+                error += "Invalid age "
+            elif int(ageentry) <= 0:
+                error += "Too young "
+            elif int(ageentry) >= 999:
+                error += "Too old "
+        else:
+            error += "No age given "
+        
+        if error != "":
+            error = "Error: " + error
+        else:
+            self.account.create_profile(nameentry, ageentry)
+            
+            self.profilepage._build_profilesframe()
+            self.destroy()
+            
+        self.errorlabel.configure(text=error)    
     
     def _build_ui(self):
-        pass # name, movie rating
+        self.grid_columnconfigure((0), weight=1)
+        self.grid_rowconfigure((0), weight=1)
+        self.frame = ctk.CTkFrame(self,bg_color=ColourScheme.Background,fg_color=ColourScheme.Background)
+        self.frame.grid(row=0,column=0,sticky="nesw")
+        self.frame.grid_columnconfigure((0, 1), weight=1)
+        self.frame.grid_rowconfigure((0, 1, 2, 3), weight=1)
+        
+        self.namelabel = ctk.CTkLabel(self.frame, text="Name: ",font=FontStyle.Text, text_color=ColourScheme.Text)  
+        self.nameentry = ctk.CTkEntry(self.frame)
+        self.namelabel.grid(row=0, column=0,sticky="e")
+        self.nameentry.grid(row=0, column=1,sticky="w")
+        
+        self.agelabel = ctk.CTkLabel(self.frame, text="Age: ", font=FontStyle.Text, text_color=ColourScheme.Text)
+        self.ageentry = ctk.CTkEntry(self.frame)
+        self.agelabel.grid(row=1, column=0,sticky="e")
+        self.ageentry.grid(row=1, column=1,sticky="w")
+        
+        self.errorlabel = ctk.CTkLabel(self.frame, text="", font=FontStyle.Text, text_color=ColourScheme.Text)
+        self.errorlabel.grid(row=2,column=0,columnspan=2)
+        
+        self.savebutton = ctk.CTkButton(self.frame, text="Create Profile", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=self._create_profile)
+        self.savebutton.grid(row=3,column=0,columnspan=2)
+
+class ProfileEditor(ctk.CTkToplevel):
+    def __init__(self, profilepage, account, profilename, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.geometry("400x400")
+        self._fg_color = ColourScheme.Background
+        self.focus()
+        self.title(profilename + "'s Settings")
+        
+        self.profilepage: ProfilePage = profilepage
+        self.account: AccMod.Account = account
+        self.profilename = profilename
+        self.profile = AccMod.Profile(self.account, self.profilename)
+        self.profile.load_from_csv()
+        self._build_ui()
+    
+    def _save_changes(self):
+        error = ""
+        nameentry = self.nameentry.get().strip()
+        ageentry = self.ageentry.get().strip()
+        
+        if self.profile.load_from_csv():
+            
+            if nameentry:
+                if nameentry in self.account._profilenames:
+                    error += "Name already in use "
+                if len(nameentry) <= 1:
+                    error += "Name too short "
+                elif len(nameentry) > 12:
+                    error += "Name too long "
+                else:
+                    for letter in "/":
+                        if letter in nameentry:
+                            error += "Invalid character (" + letter + ") "
+            
+            if ageentry:
+                if not ageentry.isdigit():
+                    error += "Invalid age "
+                elif int(ageentry) <= 0:
+                    error += "Too young "
+                elif int(ageentry) >= 999:
+                    error += "Too old "
+        
+        if error != "":
+            error = "Error: " + error
+            self.errorlabel.configure(text=error)
+        elif ageentry == "DELETE" and nameentry == "DELETE":
+            self.account.delete_profile(self.profilename)
+        else:
+            if nameentry != "" and ageentry != "":
+                self.profile.update_details(nameentry, ageentry)
+            elif nameentry != "":
+                self.profile.update_details(nameentry, self.profile._age)
+            elif ageentry!= " ":
+                self.profile.update_details(self.profilename, ageentry)
+            
+            self.profilepage._build_profilesframe()
+            self.destroy()
+        
+    
+    def _build_ui(self):
+        self.grid_columnconfigure((0), weight=1)
+        self.grid_rowconfigure((0), weight=1)
+        self.frame = ctk.CTkFrame(self,bg_color=ColourScheme.Background,fg_color=ColourScheme.Background)
+        self.frame.grid(row=0,column=0,sticky="nesw")
+        self.frame.grid_columnconfigure((0, 1), weight=1)
+        self.frame.grid_rowconfigure((0, 1, 2, 3, 4), weight=1)
+        
+        self.namelabel = ctk.CTkLabel(self.frame, text=f"Name (currently {self.profilename}): ",font=FontStyle.Text, text_color=ColourScheme.Text)  
+        self.nameentry = ctk.CTkEntry(self.frame)
+        self.namelabel.grid(row=0, column=0,sticky="e")
+        self.nameentry.grid(row=0, column=1,sticky="w")
+        
+        self.agelabel = ctk.CTkLabel(self.frame, text=f"Age (currently {self.profile._age}): ", font=FontStyle.Text, text_color=ColourScheme.Text)
+        self.ageentry = ctk.CTkEntry(self.frame)
+        self.agelabel.grid(row=1, column=0,sticky="e")
+        self.ageentry.grid(row=1, column=1,sticky="w")
+        
+        self.errorlabel = ctk.CTkLabel(self.frame, text="", font=FontStyle.Text, text_color=ColourScheme.Text)
+        self.errorlabel.grid(row=2,column=0,columnspan=2)
+        
+        self.tutoriallabel = ctk.CTkLabel(self.frame, text="Type DELETE into both boxes to delete an account", font=FontStyle.Text, text_color=ColourScheme.Text)
+        self.tutoriallabel.grid(row=3,column=0,columnspan=2)
+        
+        self.savebutton = ctk.CTkButton(self.frame, text="Save Changes", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=self._save_changes)
+        self.savebutton.grid(row=4,column=0,columnspan=2)
+        # name, movie rating
 
 #pages    
 class StandardPage(ctk.CTkFrame):
@@ -257,18 +401,26 @@ class SubscriptionManagementPage(ctk.CTkFrame):
 class ProfilePage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
+        self.profilesframe = None
         self._build_ui()
         self.edit_profile = False
     
     def _profile_button_pressed(self, profilename):
         if self.edit_profile:
             # enter the profile editor
-            pass
+            editor = ProfileEditor(self, self.master.account, profilename)
         else:
             # enter browsing page with the profile
-            pass
+            self.master.profile = AccMod.Profile(self.master.account, profilename)
+            if self.master.profile.load_from_csv():
+                self.master._change_page("BrowsingPage")
     
     def _build_profilesframe(self):
+        if self.profilesframe:
+            self.profilesframe.grid_forget()
+            for profilewidget in self.profilesframe.winfo_children():
+                profilewidget.destroy()
+        
         account : AccMod.Account = self.master.account
         profilenames = account._profilenames
         lenprofiles = len(profilenames)
@@ -281,29 +433,49 @@ class ProfilePage(ctk.CTkFrame):
             # make a profilewidget for each profile
             profile = ProfileWidget(self.profilesframe, profilenames[i])
             profile.grid(column=i%7, row=i//7)
+            
+        self.profilesframe.grid(column=1,row=2, columnspan=2)
     
     def _build_ui(self):
-        self.grid_columnconfigure((0,1,2), weight=1)
+        self.grid_columnconfigure((0,1,2,3), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         self._build_profilesframe()
-        self.profilesframe.grid(column=1,row=2)
         
-        self.label = ctk.CTkLabel(self, text="Profile Page", text_color=ColourScheme.Text, font=("arial", 40))
-        self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
+        self.label = ctk.CTkLabel(self, text="Profile Page", text_color=ColourScheme.Text, font=FontStyle.Title)
+        self.label.grid(row=0, column=1, columnspan=2, padx=20, pady=30, sticky="ew")
         
         def manageSub():
             app._change_page("SubscriptionManagementPage")
 
         self.sub_man_button = ctk.CTkButton(self, text="Manage Subscription", command=manageSub)
-        self.sub_man_button.grid(row=5, column=0, padx=20, pady=30, sticky="se")
 
         def logOut():
             app._change_page("LoginPage")
+            app.profile = None
+            app.account = None
         
-        self.log_out_button = ctk.CTkButton(app, text="Log Out", fg_color="red",hover_color="#941223", command=logOut)
-        self.log_out_button = ctk.CTkButton(self, text="Log Out", fg_color="red", command=logOut)
-        self.log_out_button.grid(row=5, column=2, padx=20, pady=30, sticky="sw")
-
+        self.log_out_button = ctk.CTkButton(self, text="Log Out", fg_color="red",hover_color="#941223", command=logOut)
+        
+        def toggleSettings():
+            self.edit_profile = not self.edit_profile
+            if self.edit_profile:
+                self.settings_button.configure(fg_color="red",hover_color="#941223")
+                self.settings_button.configure(text="Click a Profile")
+            else:
+                self.settings_button.configure(fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
+                self.settings_button.configure(text="Toggle Settings")
+            
+        self.settings_button = ctk.CTkButton(self, text="Toggle Settings", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command = toggleSettings)
+        
+        def openProfileCreator():
+            profilecreator = ProfileCreator(self, self.master.account)
+        
+        self.profilecreator_button = ctk.CTkButton(self, text="New Profile", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command = openProfileCreator)
+        self.sub_man_button.grid(row=5, column=0, padx=20, pady=30, sticky="se")
+        self.settings_button.grid(row=5, column=1)
+        self.profilecreator_button.grid(row=5, column=2)
+        self.log_out_button.grid(row=5, column=3, padx=20, pady=30, sticky="sw")
+        
 # used to map a string to a class idk actually this seems useless
 pages : dict = {"StandardPage": StandardPage, 
                 "ProfilePage": ProfilePage,
@@ -318,6 +490,7 @@ class StreamingApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.geometry("10000x10000")
+        self.title("App Name Streaming Service")
         self.currentpage: ctk.CTkFrame = None
         self.account : AccMod.Account = None
         self.profile : AccMod.Profile = None
