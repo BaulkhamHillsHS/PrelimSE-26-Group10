@@ -25,7 +25,7 @@ class ColourScheme: # for colours that won't change throughout whole app
     Foreground = "#557c45"
     Background = "#000000"
     
-    Text = "#254d11"  
+    Text = "#dddddd"  
     Button = "#EF8606"
     ButtonHover = "#40a3a0"
 
@@ -110,6 +110,7 @@ class SubscriptionManagementPage(StandardPage):
         self.return_button = ctk.CTkButton(app, text="Return to Profiles", command=button_event)
         self.return_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
 
+        
         account_plan = "Current Account Plan: premium"
         self.current_acc_plan = ctk.CTkLabel(self, text=account_plan, text_color=ColourScheme.Text, font=("arial", 20))
         self.current_acc_plan.grid(row=2, column=1, padx=20, pady=30, sticky="ew")
@@ -121,7 +122,6 @@ class LoginPage(ctk.CTkFrame):
         self._build_ui()
     
     def goToStreamingApp(self, userAccount):
-        ##DOESNT WORK RIGHT NOW - WILL FIX  
         self.master.account = userAccount
         app._change_page("ProfilePage")
         
@@ -217,7 +217,7 @@ class ProfilePage(ctk.CTkFrame):
         def logOut():
             app._change_page("LoginPage")
         
-        self.log_out_button = ctk.CTkButton(app, text="Log Out", fg_color="red", command=logOut)
+        self.log_out_button = ctk.CTkButton(app, text="Log Out", fg_color="red",hover_color="#941223", command=logOut)
         self.log_out_button.grid(row=5, column=2, padx=20, pady=30, sticky="sw")
 
 # used to map a string to a class idk actually this seems useless
@@ -273,6 +273,6 @@ class StreamingApp(ctk.CTk):
         
 if __name__ == "__main__":
     app = StreamingApp()
-    app._test_page(LoginPage(app))
+    app._change_page("LoginPage")
     app.mainloop()
 
