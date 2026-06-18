@@ -82,6 +82,7 @@ class Account:
                     "age": age,
                     "watchhistory": ""
                 })
+            self.save_to_csv()
             
     def delete_profile(self, profilename):
         if profilename in self._profilenames:
