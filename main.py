@@ -133,6 +133,8 @@ class SubscriptionManagementPage(StandardPage):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
     def _build_ui(self):
+        account : AccMod.Account = self.master.account
+    
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
@@ -146,7 +148,7 @@ class SubscriptionManagementPage(StandardPage):
         self.return_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
 
         
-        account_plan = "Current Account Plan: premium"
+        account_plan = f"The Current Account Plan: {account._plan}"
         self.current_acc_plan = ctk.CTkLabel(self, text=account_plan, text_color=ColourScheme.Text, font=("arial", 20))
         self.current_acc_plan.grid(row=2, column=1, padx=20, pady=30, sticky="ew")
 
@@ -160,8 +162,8 @@ class LoginPage(ctk.CTkFrame):
     def goToStreamingApp(self, userAccount):
         self.master.account = userAccount
         app._change_page("ProfilePage")
-            
-    
+        
+
     def twoFactAuth(self, userAccount, user_email):
         
         for widget in self.winfo_children():
@@ -186,7 +188,7 @@ class LoginPage(ctk.CTkFrame):
         email = "devashreepatel95@gmail.com" #usually company email
         receiver_email = user_email
         code = str(123456)
-        email_message = f"Subject: APPNAME STREAMING SERVICE SIX-DIGIT CODE \n\n Your one time six digit code is: {code} This code expires in 15 minutes."
+        email_message = f"Subject: APPNAME STREAMING SERVICE SIX-DIGIT CODE \n\n Your one time six digit code is: {code} \nThis code expires in 15 minutes."
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(email,"luruzlexucsjtmjg")
@@ -209,7 +211,6 @@ class LoginPage(ctk.CTkFrame):
         
     
     def _build_ui(self):
-        self.window.geometry
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
@@ -339,6 +340,7 @@ class StreamingApp(ctk.CTk):
         else:
             raise KeyError(f"Page {newpage} does not exist")
     
+    #this method is no longer used anywhere should we delete it???
     def _test_page(self, page):
         """
         See what a page looks like (for testing only)
@@ -349,12 +351,7 @@ class StreamingApp(ctk.CTk):
            
         self.currentpage = page
         self.currentpage.grid(row=0, column=0, sticky="nesw")
-        
-
-
-        
-
-        
+             
 if __name__ == "__main__":
     app = StreamingApp()
     app._change_page("LoginPage")
