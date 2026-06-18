@@ -6,7 +6,12 @@ from videomodule import movies
 import pyotp
 import time
 import smtplib
+from PIL import Image #used for profile images
 
+class Font:
+    Title = ""
+    Subtitle = ""
+    Text = ""
 
 class FontSize: 
     # so that we can easily change formatting
@@ -23,12 +28,13 @@ class ColourScheme: # for colours that won't change throughout whole app
     Primary = "#2d8a1f"
     Secondary = "#dee60e"
     Foreground = "#557c45"
-    Background = "#000000"
+    Background = "#FDD973"
     
-    Text = "#254d11"  
+    Text = "#1e3712"  
     Button = "#EF8606"
     ButtonHover = "#40a3a0"
 
+# widgets
 class VideoWidget(ctk.CTkFrame):
     def __init__(self, image,  *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,21 +44,53 @@ class VideoWidget(ctk.CTkFrame):
         pass
 
 class ProfileWidget(ctk.CTkFrame):
+    profileimage = Image.open("Images/userimage.png")
     def __init__(self, master, name, *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
-        self._build_ui()
+        super().__init__(master, *args, fg_color=ColourScheme.Foreground, bg_color=ColourScheme.Foreground, **kwargs)
         self.name = name
+        self._build_ui()
     
-    def _build_ui():
-        pass
+    def _button_click(self, widget, name):
+        # thiswidget -> profilesframe -> profilepage
+        the_profile_page: ProfilePage = widget.master.master
+        the_profile_page._profile_button_pressed(name)
+    
+    def _build_ui(self):
+        self.grid_columnconfigure((0),weight=1)
+        self.grid_rowconfigure((0,1,2),weight=1)
+        
+        self.namelabel = ctk.CTkLabel(self,text=self.name,text_color=ColourScheme.Text)
+        self.namelabel.grid(column=0,row=0)
+        
+        self.profileframe = ctk.CTkFrame(self)
+        self.profileframe.grid(column=0,row=1,rowspan=2)
 
+        self.profilebutton = ctk.CTkButton(self.profileframe, image=ctk.CTkImage(self.profileimage, self.profileimage,size=(140,140)),height=140,text="",hover_color=ColourScheme.ButtonHover,
+                                           command=lambda: self._button_click(self, self.name))
+        
+        # random formulas to make a profile colour
+        num = 0
+        for letter in self.name:
+            num += (ord(letter)-64) * 1862026
+        profile_colour = "#" + hex(num%16777216)[2:]
+        profile_colour = profile_colour.capitalize()
+        if len(profile_colour) != 7:
+            profile_colour = ColourScheme.Primary
+        
+        self.profilebutton.configure(fg_color=profile_colour)
+        self.profilebutton.configure(bg_color=profile_colour)
+        self.profilebutton.grid(column=0,row=0)
+
+# ctktoplevels? what do i even call this
 class ProfileEditor(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.focus()
     
     def _build_ui(self):
         pass # name, movie rating
-    
+
+#pages    
 class StandardPage(ctk.CTkFrame):
     """
     Parent class for pages that can be accessed when in a profile
@@ -68,6 +106,7 @@ class StandardPage(ctk.CTkFrame):
         for child in self.winfo_children():
             pass
 
+#pages after picking a profile
 class VideoPage(StandardPage):
     """
     Screen to display when selecting a movie/show
@@ -114,7 +153,7 @@ class SubscriptionManagementPage(StandardPage):
         self.current_acc_plan = ctk.CTkLabel(self, text=account_plan, text_color=ColourScheme.Text, font=("arial", 20))
         self.current_acc_plan.grid(row=2, column=1, padx=20, pady=30, sticky="ew")
 
-    
+#starting page    
 class LoginPage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
@@ -122,6 +161,7 @@ class LoginPage(ctk.CTkFrame):
     
     def goToStreamingApp(self, userAccount):
         ##DOESNT WORK RIGHT NOW - WILL FIX  
+        #idk it seems pretty working to me
         self.master.account = userAccount
         app._change_page("ProfilePage")
         
@@ -194,16 +234,40 @@ class LoginPage(ctk.CTkFrame):
         self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=lambda: self.Login(self.email_entry.get(), self.password_entry.get()))
         self.login_button.grid(row=5, column=1, padx=40, pady=5, sticky="ew")
 
+#page to select profile
 class ProfilePage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
         self._build_ui()
+        self.edit_profile = False
+    
+    def _profile_button_pressed(self, profilename):
+        if self.edit_profile:
+            # enter the profile editor
+            pass
+        else:
+            # enter browsing page with the profile
+            pass
+    
+    def _build_profilesframe(self):
+        account : AccMod.Account = self.master.account
+        profilenames = account._profilenames
+        lenprofiles = len(profilenames)
         
+        self.profilesframe = ctk.CTkFrame(self, fg_color=ColourScheme.Foreground, bg_color=ColourScheme.Foreground)
+        self.profilesframe.grid_columnconfigure(tuple(range(lenprofiles%7+1)), weight=1)
+        self.profilesframe.grid_rowconfigure(tuple(range(lenprofiles//7+1)), weight=1)
+        
+        for i in range(lenprofiles):
+            # make a profilewidget for each profile
+            profile = ProfileWidget(self.profilesframe, profilenames[i])
+            profile.grid(column=i%7, row=i//7)
+    
     def _build_ui(self):
-        account = self.master.account
-        profiles = account._profiles
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
+        self._build_profilesframe()
+        self.profilesframe.grid(column=1,row=2)
         
         self.label = ctk.CTkLabel(self, text="Profile Page", text_color=ColourScheme.Text, font=("arial", 40))
         self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
@@ -211,13 +275,13 @@ class ProfilePage(ctk.CTkFrame):
         def manageSub():
             app._change_page("SubscriptionManagementPage")
 
-        self.sub_man_button = ctk.CTkButton(app, text="Manage Subscription", command=manageSub)
-        self.sub_man_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
+        self.sub_man_button = ctk.CTkButton(self, text="Manage Subscription", command=manageSub)
+        self.sub_man_button.grid(row=5, column=0, padx=20, pady=30, sticky="se")
 
         def logOut():
             app._change_page("LoginPage")
         
-        self.log_out_button = ctk.CTkButton(app, text="Log Out", fg_color="red", command=logOut)
+        self.log_out_button = ctk.CTkButton(self, text="Log Out", fg_color="red", command=logOut)
         self.log_out_button.grid(row=5, column=2, padx=20, pady=30, sticky="sw")
 
 # used to map a string to a class idk actually this seems useless
@@ -233,6 +297,7 @@ class StreamingApp(ctk.CTk):
     Title = "App"
     def __init__(self):
         super().__init__()
+        self.geometry("10000x10000")
         self.currentpage: ctk.CTkFrame = None
         self.account : AccMod.Account = None
         self.profile : AccMod.Profile = None
