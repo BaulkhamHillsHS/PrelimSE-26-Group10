@@ -73,6 +73,7 @@ class ProfileWidget(ctk.CTkFrame):
         self.profilebutton.grid(column=0,row=0)
 
 # ctktoplevels? what do i even call this
+blacklistednamechars = "/,"
 class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
     def __init__(self, profilepage, account, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -98,7 +99,7 @@ class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
             elif len(nameentry) > 12:
                 error += "Name too long "
             else:
-                for letter in "/":
+                for letter in blacklistednamechars:
                     if letter in nameentry:
                         error += "Invalid character (" + letter + ") "
         else:
@@ -178,7 +179,7 @@ class ProfileEditor(ctk.CTkToplevel):
                 elif len(nameentry) > 12:
                     error += "Name too long "
                 else:
-                    for letter in "/":
+                    for letter in blacklistednamechars:
                         if letter in nameentry:
                             error += "Invalid character (" + letter + ") "
             
