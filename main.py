@@ -98,13 +98,8 @@ class StandardPage(ctk.CTkFrame):
     def __init__(self, master, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
     
-    def _build_ui(self):
+    def _build_ui(self): #method to be overriden
         pass
-
-    def _apply_theme(self, theme): 
-        #probably won't need this since i don't think we're adding themes
-        for child in self.winfo_children():
-            pass
 
 #pages after picking a profile
 class VideoPage(StandardPage):
@@ -131,27 +126,6 @@ class VideoPage(StandardPage):
         
 class BrowsingPage(StandardPage):
     pass
-
-class SubscriptionManagementPage(StandardPage):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
-        self._build_ui()
-    def _build_ui(self):
-        self.grid_columnconfigure((0,1,2), weight=1)
-        self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
-        
-        self.label = ctk.CTkLabel(self, text="Manage Subscription", text_color=ColourScheme.Text, font=("arial", 40))
-        self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
-        
-        def button_event():
-            app._change_page("ProfilePage")
-
-        self.return_button = ctk.CTkButton(app, text="Return to Profiles", command=button_event)
-        self.return_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
-
-        account_plan = "Current Account Plan: premium"
-        self.current_acc_plan = ctk.CTkLabel(self, text=account_plan, text_color=ColourScheme.Text, font=("arial", 20))
-        self.current_acc_plan.grid(row=2, column=1, padx=20, pady=30, sticky="ew")
 
 #starting page    
 class LoginPage(ctk.CTkFrame):
@@ -234,7 +208,28 @@ class LoginPage(ctk.CTkFrame):
         self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=lambda: self.Login(self.email_entry.get(), self.password_entry.get()))
         self.login_button.grid(row=5, column=1, padx=40, pady=5, sticky="ew")
 
-#page to select profile
+#page after logging into an account
+class SubscriptionManagementPage(ctk.CTkFrame):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
+        self._build_ui()
+    def _build_ui(self):
+        self.grid_columnconfigure((0,1,2), weight=1)
+        self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
+        
+        self.label = ctk.CTkLabel(self, text="Manage Subscription", text_color=ColourScheme.Text, font=("arial", 40))
+        self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
+        
+        def button_event():
+            app._change_page("ProfilePage")
+
+        self.return_button = ctk.CTkButton(app, text="Return to Profiles", command=button_event)
+        self.return_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
+
+        account_plan = "Current Account Plan: premium"
+        self.current_acc_plan = ctk.CTkLabel(self, text=account_plan, text_color=ColourScheme.Text, font=("arial", 20))
+        self.current_acc_plan.grid(row=2, column=1, padx=20, pady=30, sticky="ew")
+
 class ProfilePage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
