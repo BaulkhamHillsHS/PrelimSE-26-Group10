@@ -71,13 +71,16 @@ class Account:
     def create_profile(self, name, age):
         # not bothered to rewrite it with csvmodule
         fields = ["accountemail", "profilename", "age", "watchhistory"]
-        if name in self._profilenames:
+        if not find_row("profiles.csv", ["accountemail", "profilename"], {"accountemail": self._email, "profilename": name}):
+            if not name in self._profilenames:
+                self._profilenames.append(name)
             with open("profiles.csv", mode="a", newline="") as f:
                 writer = csv.DictWriter(f, fields)
                 writer.writerow({
                     "accountemail": self._email,
                     "profilename": name,
-                    "age": age
+                    "age": age,
+                    "watchhistory": ""
                 })
             
     def delete_profile(self, profilename):
@@ -111,6 +114,25 @@ def login(email, password):
     if testLogin.load_from_csv():
         return testLogin
     return False
+
+
+def create_profiles(account: Account):
+    from random import randint
+    for profilename in account._profilenames:
+        account.create_profile(profilename, randint(1, 50))
+create_profiles(login("ryan.dunne9@det.nsw.edu.au","Baulko11!!"))
+create_profiles(login("devashreepatel95@gmail.com","Software"))
+create_profiles(login("account.two@gmail.com","password123"))
+create_profiles(login("bzzt@gmail.com","12345688"))
+create_profiles(login("freeplan@gmail.com","qwertyuiop"))
+create_profiles(login("freeflix@gmail.com","freeflix"))
+create_profiles(login("freecompanyaccount@yahoo.com","password"))
+create_profiles(login("JayGatsby@gmail.com","DaisyGatsby"))
+create_profiles(login("TomBuchanan@gmail.com","EastEgg"))
+create_profiles(login("Heathcliff@gmail.com","Cathy"))
+create_profiles(login("support@steampowered.com","Valve"))
+create_profiles(login("HDPiratedMovies@gmail.com","free"))
+create_profiles(login("tgvbhjj2@gmail.com","password"))
 
 testing = False
 if __name__ == "__main__" and testing:
