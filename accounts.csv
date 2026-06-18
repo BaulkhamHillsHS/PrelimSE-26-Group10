@@ -1,14 +1,14 @@
 accountname,email,password,plan,profiles
-MrDunne, ryan.dunne9@det.nsw.edu.au, Baulko11!!, Premium Plan, profileone/profiletwo
-Devashree, devashreepatel95@gmail.com, Software, Premium Plan, Devashree
-accounttwo, account.two@gmail.com, password123, Free Plan, profile/software
-botone, bzzt@gmail.com, 12345688, Standard Plan, botone/bottwo/botthree/botfour/botfive
-testdataaccount, freeplan@gmail.com, qwertyuiop, Standard Plan, myaccount
-mypersonalaccount, freeflix@gmail.com, freeflix, Free Plan, mymainaccount
-appnamestreamingservice, freecompanyaccount@yahoo.com, password, Premium Plan, jos
-JayGatsby, JayGatsby@gmail.com, DaisyGatsby, Premium Plan, Gatsby
-TomBuchanan, TomBuchanan@gmail.com, EastEgg, Premium Plan, Tom
-Heathcliff, Heathcliff@gmail.com, Cathy, Free Plan, Hindley/Hareton
-Steam, support@steampowered.com, Valve, Free Plan, CompanyAccount
-PiratingMovies, HDPiratedMovies@gmail.com, free, PremiumPlan, Personal/Pirating
-kevin, tgvbhjj2@gmail.com, password, Free Plan, me
+MrDunne,ryan.dunne9@det.nsw.edu.au,Baulko11!!,PremiumPlan,profileone/profiletwo
+Devashree,devashreepatel95@gmail.com,Software,PremiumPlan,Devashree
+accounttwo,account.two@gmail.com,password123,FreePlan,profile/software
+botone,bzzt@gmail.com,12345688,StandardPlan,botone/bottwo/botthree/botfour/botfive
+testdataaccount,freeplan@gmail.com,qwertyuiop,StandardPlan,myaccount
+mypersonalaccount,freeflix@gmail.com,freeflix,FreePlan,mymainaccount
+appnamestreamingservice,freecompanyaccount@yahoo.com,password,PremiumPlan,jos
+JayGatsby,JayGatsby@gmail.com,DaisyGatsby,PremiumPlan,Gatsby
+TomBuchanan,TomBuchanan@gmail.com,EastEgg,PremiumPlan,Tom
+Heathcliff,Heathcliff@gmail.com,Cathy,FreePlan,Hindley/Hareton
+Steam,support@steampowered.com,Valve,FreePlan,CompanyAccount
+PiratingMovies,HDPiratedMovies@gmail.com,free,PremiumPlan,Personal/Pirating
+kevin,tgvbhjj2@gmail.com,password,FreePlan,me
