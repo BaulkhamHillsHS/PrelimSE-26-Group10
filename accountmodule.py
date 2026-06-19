@@ -117,6 +117,12 @@ def login(email, password):
         return testLogin
     return False
 
+def returnProfiles(account: Account):
+    acc_profiles = []
+    for profile  in account._profilenames:
+        acc_profiles.append(Profile(account,profile))
+    return acc_profiles
+
 testing = False
 if __name__ == "__main__" and testing:
     print(login("ryan.dunne9@det.nsw.edu.au", "Baulko11!!"))

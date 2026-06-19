@@ -110,7 +110,7 @@ class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
                 error += "Invalid age "
             elif int(ageentry) <= 0:
                 error += "Too young "
-            elif int(ageentry) >= 999:
+            elif int(ageentry) >= 150:
                 error += "Too old "
         else:
             error += "No age given "
@@ -274,30 +274,6 @@ class VideoPage(StandardPage):
 class BrowsingPage(StandardPage):
     pass
 
-class SubscriptionManagementPage(StandardPage):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
-        self._build_ui()
-    def _build_ui(self):
-        account : AccMod.Account = self.master.account
-    
-        self.grid_columnconfigure((0,1,2), weight=1)
-        self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
-        
-        self.label = ctk.CTkLabel(self, text="Manage Subscription", text_color=ColourScheme.Text, font=("arial", 40))
-        self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
-        
-        def button_event():
-            app._change_page("ProfilePage")
-
-        self.return_button = ctk.CTkButton(app, text="Return to Profiles", command=button_event)
-        self.return_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
-
-        
-        account_plan = f"The Current Account Plan: {account._plan}"
-        self.current_acc_plan = ctk.CTkLabel(self, text=account_plan, text_color=ColourScheme.Text, font=("arial", 20))
-        self.current_acc_plan.grid(row=2, column=1, padx=20, pady=30, sticky="ew")
-
     
 #starting page    
 class LoginPage(ctk.CTkFrame):
@@ -384,6 +360,9 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
     def _build_ui(self):
+        account : AccMod.Account = self.master.account
+        profilenames = account._profilenames
+        
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
@@ -396,9 +375,17 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         self.return_button = ctk.CTkButton(app, text="Return to Profiles", command=button_event)
         self.return_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
 
-        account_plan = "Current Account Plan: premium"
+        account_plan = f"The Current Account Plan: {account._plan}"
         self.current_acc_plan = ctk.CTkLabel(self, text=account_plan, text_color=ColourScheme.Text, font=("arial", 20))
         self.current_acc_plan.grid(row=2, column=1, padx=20, pady=30, sticky="ew")
+        
+        profiles: list[AccMod.Profile] = AccMod.returnProfiles(account)
+        for profile in profiles:
+            print(profile._profilename)
+            
+            for show in profile._history:
+                print(show)
+        
 
 class ProfilePage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
