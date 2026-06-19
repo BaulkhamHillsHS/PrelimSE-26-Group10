@@ -1,0 +1,6 @@
+-SUBSCRIPTION INVOICE- 
+From: AppName Streaming Service
+Bill to: Devashree
+Service: Premium Plan 
+Rate: $15.99/month
+Total: $15.99

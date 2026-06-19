@@ -298,7 +298,7 @@ class LoginPage(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
         self.label.grid(row=0, column=1, padx=10, pady=15, sticky="ew")
             
-        self.label = ctk.CTkLabel(self, text="A six digit code has been sent to your email: ", text_color=ColourScheme.Text, font=("arial", 20))
+        self.label = ctk.CTkLabel(self, text="A six digit code has been sent to your email. If you do not see it please check spam. ", text_color=ColourScheme.Text, font=("arial", 20))
         self.label.grid(row=1, column=1, padx=20, pady=5, sticky="ew")
         
         self.code_entry = ctk.CTkEntry(self, placeholder_text="XXXXXX", height=30)
@@ -391,7 +391,11 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         def change_to_free():
             if messagebox.askyesno('Change Plan', 'Change current plan to Free Plan?'):
                 account.update_plan("FreePlan")
-            
+                fh = open('subscription_invoice.txt', 'w')
+                fh.write(f'-SUBSCRIPTION INVOICE- \nFrom: AppName Streaming Service\nBill to: {account.name}\nService: Free Plan \nRate: $0.00/month\nTotal: $0.00')
+                fh.close()
+                app._change_page("SubscriptionManagementPage")
+                
                  
         self.free_button = ctk.CTkButton(self, text="Free Plan: $0.00/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=change_to_free)
         self.free_button.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
@@ -399,6 +403,10 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         def change_to_standard():
             if messagebox.askyesno('Change Plan', 'Change current plan to Standard Plan?'):
                 account.update_plan("StandardPlan")
+                fh = open('subscription_invoice.txt', 'w')
+                fh.write(f'-SUBSCRIPTION INVOICE- \nFrom: AppName Streaming Service\nBill to: {account.name}\nService: Standard Plan \nRate: $11.99/month\nTotal: $11.99')
+                fh.close()
+                app._change_page("SubscriptionManagementPage")
             
             
         self.standard_button = ctk.CTkButton(self, text="Standard Plan: $11.99/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=change_to_standard)
@@ -407,13 +415,17 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         def change_to_premium():
             if messagebox.askyesno('Change Plan', 'Change current plan to Premium Plan?'):
                 account.update_plan("PremiumPlan")
-           
+                fh = open('subscription_invoice.txt', 'w')
+                fh.write(f'-SUBSCRIPTION INVOICE- \nFrom: AppName Streaming Service\nBill to: {account.name}\nService: Premium Plan \nRate: $15.99/month\nTotal: $15.99')
+                fh.close()
+                app._change_page("SubscriptionManagementPage")           
             
         self.premium_button = ctk.CTkButton(self, text="Premium Plan: $15.99/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=change_to_premium)
         self.premium_button.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
         
         ## popup that ask you if you are sure that you want to change the plan
         ## txt file showing supscription invoice after change of plan
+        
 
         
 class ProfilePage(ctk.CTkFrame):
