@@ -7,6 +7,7 @@ import pyotp
 import time
 import smtplib
 from PIL import Image #used for profile images
+from tkinter import messagebox
 
 class FontStyle:
     Title = ("Arial", 40)
@@ -17,13 +18,13 @@ class ColourScheme: # for colours that won't change throughout whole app
     #temporary (looks very bad)
     Primary = "#2d8a1f"
     Secondary = "#dee60e"
-    Foreground = "#557c45"
+    Foreground = "#161616"
     Background = "#000000"
     
     Text = "#dddddd"  
     Red = "red"
     Button = "#EF8606"
-    ButtonHover = "#40a3a0"
+    ButtonHover = "#844A04"
 
 # widgets
 class VideoWidget(ctk.CTkFrame):
@@ -295,7 +296,7 @@ class LoginPage(ctk.CTkFrame):
         
         #build page elements
         self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
-        self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
+        self.label.grid(row=0, column=1, padx=10, pady=15, sticky="ew")
             
         self.label = ctk.CTkLabel(self, text="A six digit code has been sent to your email: ", text_color=ColourScheme.Text, font=("arial", 20))
         self.label.grid(row=1, column=1, padx=20, pady=5, sticky="ew")
@@ -321,6 +322,8 @@ class LoginPage(ctk.CTkFrame):
         def checkUsercode(usercode, code):    
             if usercode == code:
                 self.goToStreamingApp(userAccount)
+            else:
+                messagebox.showwarning('Incorrect Code', 'This code is not correct')
 
             
     def Login(self, email, password):  
@@ -328,8 +331,10 @@ class LoginPage(ctk.CTkFrame):
         userAccount = AccMod.login(email, password)
         if userAccount != False:
             self.twoFactAuth(userAccount, email)                        
+        elif not email or not password: 
+            messagebox.showwarning('Details Missing', 'Please enter both email and password')
         else:
-            print("Incorrect email or password")
+            messagebox.showwarning('Account not found', 'Please enter valid credentials')
         
     
     def _build_ui(self):
@@ -361,8 +366,6 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         self._build_ui()
     def _build_ui(self):
         account : AccMod.Account = self.master.account
-        profilenames = account._profilenames
-        
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
@@ -372,21 +375,29 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         def button_event():
             app._change_page("ProfilePage")
 
-        self.return_button = ctk.CTkButton(app, text="Return to Profiles", command=button_event)
-        self.return_button.grid(row=0, column=2, padx=20, pady=30, sticky="nw")
+        self.return_button = ctk.CTkButton(self, text="Return to Profiles", command=button_event)
+        self.return_button.grid(row=0, column=2, padx=0, pady=15, sticky="ne")
 
         account_plan = f"The Current Account Plan: {account._plan}"
         self.current_acc_plan = ctk.CTkLabel(self, text=account_plan, text_color=ColourScheme.Text, font=("arial", 20))
-        self.current_acc_plan.grid(row=2, column=1, padx=20, pady=30, sticky="ew")
+        self.current_acc_plan.grid(row=1, column=1, padx=20, pady=10, sticky="ew")
         
-        profiles: list[AccMod.Profile] = AccMod.returnProfiles(account)
-        for profile in profiles:
-            print(profile._profilename)
-            
-            for show in profile._history:
-                print(show)
+        self.text = ctk.CTkLabel(self, text="Plans Available", text_color=ColourScheme.Text, font=("arial", 20))
+        self.text.grid(row=2, column=1, padx=10, pady=8, sticky="ew")
         
+        self.free_button = ctk.CTkButton(self, text="Free Plan: $0.00/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
+        self.free_button.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
 
+        self.standard_button = ctk.CTkButton(self, text="Standard Plan: $11.99/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
+        self.standard_button.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
+        
+        self.premium_button = ctk.CTkButton(self, text="Premium Plan: $15.99/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
+        self.premium_button.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
+        
+        ## popup that ask you if you are sure that you want to change the plan
+        ## txt file showing supscription invoice after change of plan
+
+        
 class ProfilePage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
