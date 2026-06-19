@@ -310,14 +310,16 @@ class LoginPage(ctk.CTkFrame):
         #send email
         email = "devashreepatel95@gmail.com" #usually company email
         receiver_email = user_email
-        code = str(123456)
-        email_message = f"Subject: APPNAME STREAMING SERVICE SIX-DIGIT CODE \n\n Your one time six digit code is: {code} \nThis code expires in 15 minutes."
+        key = pyotp.random_base32()
+        code = str(pyotp.TOTP(key).now())
+        email_message = f"Subject: APPNAME STREAMING SERVICE SIX-DIGIT CODE \n\n Your one time six digit code is: {code}"
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(email,"luruzlexucsjtmjg")
+        
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
-        #server.sendmail(email, receiver_email, email_message)
+        server.sendmail(email, receiver_email, email_message)
 
         def checkUsercode(usercode, code):    
             if usercode == code:
@@ -360,6 +362,7 @@ class LoginPage(ctk.CTkFrame):
         self.login_button.grid(row=5, column=1, padx=40, pady=5, sticky="ew")
 
 #page after logging into an account
+# I need to fix it as it doesnt immeditatley load the updataed plan + it needs to print a TXT recpiet file
 class SubscriptionManagementPage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
@@ -385,13 +388,28 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         self.text = ctk.CTkLabel(self, text="Plans Available", text_color=ColourScheme.Text, font=("arial", 20))
         self.text.grid(row=2, column=1, padx=10, pady=8, sticky="ew")
         
-        self.free_button = ctk.CTkButton(self, text="Free Plan: $0.00/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
+        def change_to_free():
+            if messagebox.askyesno('Change Plan', 'Change current plan to Free Plan?'):
+                account.update_plan("FreePlan")
+            
+                 
+        self.free_button = ctk.CTkButton(self, text="Free Plan: $0.00/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=change_to_free)
         self.free_button.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
 
-        self.standard_button = ctk.CTkButton(self, text="Standard Plan: $11.99/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
+        def change_to_standard():
+            if messagebox.askyesno('Change Plan', 'Change current plan to Standard Plan?'):
+                account.update_plan("StandardPlan")
+            
+            
+        self.standard_button = ctk.CTkButton(self, text="Standard Plan: $11.99/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=change_to_standard)
         self.standard_button.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
         
-        self.premium_button = ctk.CTkButton(self, text="Premium Plan: $15.99/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover)
+        def change_to_premium():
+            if messagebox.askyesno('Change Plan', 'Change current plan to Premium Plan?'):
+                account.update_plan("PremiumPlan")
+           
+            
+        self.premium_button = ctk.CTkButton(self, text="Premium Plan: $15.99/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=change_to_premium)
         self.premium_button.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
         
         ## popup that ask you if you are sure that you want to change the plan

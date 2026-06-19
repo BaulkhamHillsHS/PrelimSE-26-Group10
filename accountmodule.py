@@ -68,6 +68,17 @@ class Account:
         self._profilenames : list[Profile] = []
         self._password : str = password
         
+    def update_plan(self, new_plan): 
+        #accountname,email,password,plan,profiles
+        edit_row("accounts.csv", 
+                 ["email"], 
+                 {"email" : self._email}, 
+                 {"plan": new_plan})
+        self._plan = new_plan
+        self.save_to_csv()
+        
+        self._plan = new_plan
+    
     def create_profile(self, name, age):
         # not bothered to rewrite it with csvmodule
         fields = ["accountemail", "profilename", "age", "watchhistory"]
