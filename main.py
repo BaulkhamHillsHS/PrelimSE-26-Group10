@@ -343,6 +343,12 @@ class BrowsingPage(StandardPage):
         self.moviescrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Movies", VidMod.Movies, fg_color=ColourScheme.Foreground)
         self.moviescrollframe.grid(row=2,column=0, sticky="nesw")
         
+        self.watchhistoryscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch History", None, fg_color=ColourScheme.Foreground)
+        self.watchhistoryscrollframe.grid(row=3,column=0, sticky="nesw")
+        
+        self.watchlistscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch List", None, fg_color=ColourScheme.Foreground)
+        self.watchlistscrollframe.grid(row=4,column=0, sticky="nesw")
+        
         self.temporarybutton = ctk.CTkButton(self,text="go to videopage temporary", command=lambda: self._video_select_event(VidMod.MovieData("315162","Puss in Boots: The Last Wish").load()))
         self.temporarybutton.place(x=100,y=100)
     
