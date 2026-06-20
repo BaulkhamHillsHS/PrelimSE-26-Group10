@@ -423,11 +423,15 @@ class LoginPage(ctk.CTkFrame):
         
     
     def _build_ui(self):
+        logo = Image.open("Images/appname_ss_logo.png")
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
         self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
         self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
+        
+        self.logo = ctk.CTkLabel(self, text="",image=ctk.CTkImage(logo,logo,size=(100,100)))
+        self.logo.grid(row=0, column=1, padx=10, pady=10, sticky="w")
                 
         self.email_entry = ctk.CTkEntry(self, placeholder_text="Enter your email", height=30)
         self.email_entry.grid(row=1,column=1,padx=20,pady=5, sticky= "ew")
