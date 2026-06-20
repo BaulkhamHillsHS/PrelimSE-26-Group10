@@ -1,4 +1,4 @@
-id,name,number_of_seasons,backdrop_path,poster_path,genres,age_rating
+id,title,number_of_seasons,backdrop_path,poster_path,genres,age_rating
 87108,Chernobyl,1,/20eIP9o5ebArmu2HxJutaBjhLf4.jpg,/hlLXt2tOPT6RRnjiUmoxyG1LTFi.jpg,Drama,MA15+
 88396,The Falcon and the Winter Soldier,1,/aTjbqMONy77fHJrIYu14g1F0d5h.jpg,/6kbAMLteGO8yyewYau6bJ683sw7.jpg,Action & Adventure/Drama,M
 88329,Hawkeye,1,/1R68vl3d5s86JsS2NPjl8UoMqIS.jpg,/ct5pNE5dDHryHLDnxyZPYcqO1sz.jpg,Drama/Comedy/Action & Adventure,M
