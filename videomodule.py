@@ -43,7 +43,7 @@ class VideoData:
     """
     AgeRatings = {"G": 0,"PG": 0,"M" : 12,"MA15+": 15,"R": 18}
     def __init__(self, id, title, backdrop_path="", age_rating="", genre_ids="", **kwargs):
-        self.ID = id
+        self.id = id
         self.name = title
         self.backdroppath = backdrop_path
         self.backdropimage = None
@@ -183,7 +183,22 @@ def filter_videos(videos: list, genres: list, agerating: int):
                     videos[i].loadImages()
                     indexes.append(i)
                     break
-    return indexes
+    return [videos[x] for x in indexes]
+
+def videos_from_ids(ids):
+    found = []
+    for movie in Movies:
+        if movie.id in ids:
+            found.append(movie)
+    for show in Shows:
+        if show.id in ids:
+            found.append(show)
+    
+    newfoundlist = []
+    for video in found:
+        newfoundlist[ids.index(video.id)] = video
+        
+    return newfoundlist
 
 #Creating movie list to import into main.py
 Movies = []
