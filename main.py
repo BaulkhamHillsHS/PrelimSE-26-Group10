@@ -258,8 +258,7 @@ class ProfileEditor(ctk.CTkToplevel):
                 
                 self.profilepage._build_profilesframe()
                 self.destroy()
-        
-    
+           
     def _build_ui(self):
         self.grid_columnconfigure((0), weight=1)
         self.grid_rowconfigure((0), weight=1)
@@ -295,9 +294,23 @@ class StandardPage(ctk.CTkFrame):
     """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master, *args, fg_color=ColourScheme.Background, **kwargs)
+        self._build_ui()
     
     def _build_ui(self): #method to be overriden
-        pass
+        logo = Image.open("Images/appname_ss_logo.png")
+        self.grid_columnconfigure((0,1,2), weight=1)
+        self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
+        
+        self.logo = ctk.CTkLabel(self, text="",image=ctk.CTkImage(logo,logo,size=(100,100)))
+        self.logo.grid(row=0, column=1, padx=10, pady=10, sticky="nw")
+        
+        def goMenuPage():
+            app._change_page("MenuPage")
+    
+        self.menu_button = ctk.CTkButton(self, text="Menu",bg_color=ColourScheme.Button, command=goMenuPage)
+        self.menu_button.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
+        ##MAYBE CHANGE TO APP INSTEAD OF SELF SO IT APPEARS EVERYWHERE???
+        
 
 #pages after picking a profile
 class VideoPage(StandardPage):
@@ -364,12 +377,12 @@ class LoginPage(ctk.CTkFrame):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
     
-    def goToStreamingApp(self, userAccount):
+    def _goToStreamingApp(self, userAccount):
         self.master.account = userAccount
         app._change_page("ProfilePage")
         
 
-    def twoFactAuth(self, userAccount, user_email):
+    def _2FactAuth(self, userAccount, user_email):
         
         for widget in self.winfo_children():
                 widget.destroy()   
@@ -405,7 +418,7 @@ class LoginPage(ctk.CTkFrame):
 
         def checkUsercode(usercode, code):    
             if usercode == code:
-                self.goToStreamingApp(userAccount)
+                self._goToStreamingApp(userAccount)
             else:
                 messagebox.showwarning('Incorrect Code', 'This code is not correct')
 
@@ -415,7 +428,7 @@ class LoginPage(ctk.CTkFrame):
         userAccount = AccMod.login(email, password)
         if userAccount != False:
             messagebox.showwarning('Login Sucessful', 'You have sucessfully logged in!')
-            self.twoFactAuth(userAccount, email)                        
+            self._2FactAuth(userAccount, email)                        
         elif not email or not password: 
             messagebox.showwarning('Details Missing', 'Please enter both email and password')
         else:
