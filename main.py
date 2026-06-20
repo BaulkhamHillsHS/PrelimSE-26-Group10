@@ -2,7 +2,7 @@
 import customtkinter as ctk
 import tkinter as tk
 import accountmodule as AccMod
-from videomodule import movies
+import videomodule as VidMod
 import pyotp
 import time
 import smtplib
@@ -28,13 +28,34 @@ class ColourScheme: # for colours that won't change throughout whole app
 
 # widgets
 class VideoWidget(ctk.CTkFrame):
-    def __init__(self, image,  *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.image = image
+    def __init__(self, data, width=40, height=80, *args, **kwargs):
+        super().__init__(width=width,height=height, *args, **kwargs)
+        self.data : VidMod.VideoData = data
+    
+    def _video_select(self):
+        self.master._video_select_event(self.data)
     
     def _build_ui(self):
-        pass
-
+        self.grid_columnconfigure((0), weight=1)
+        self.grid_rowconfigure((0,1,2,3,4,5,6), weight=1)
+        
+        self.namelabel = ctk.CTkLabel(self, text=self.data.name,font=FontStyle.Text,text_color=ColourScheme.Text)
+        self.namelabel.grid(column=0,row=0,sticky="nesw")
+        
+        self.selectbutton = ctk.CTkButton(self, text="",image=ctk.CTkImage(self.data.backdropimage, self.data.backdropimage),command = lambda x: self._video_select())
+        self.selectbutton.grid(column=0,row=1,rowspan=5,sticky="nesw")
+        
+        info = self.data.age_rating
+        if "movie" in type(info).__name__.lower():
+            info += ", Movie"
+        elif "show" in type(info).__name__.lower():
+            info += ", Show"
+        for genre in self.data.genres:
+            info += genre
+            
+        self.infolabel = ctk.CTkLabel(self, text=info,font=FontStyle.Text,text_color=ColourScheme.Text)
+        self.infolabel.grid(column=0,row=6,sticky="nesw")
+        
 class ProfileWidget(ctk.CTkFrame):
     profileimage = Image.open("Images/userimage.png")
     def __init__(self, master, name, *args, **kwargs):
@@ -119,10 +140,11 @@ class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
         if error != "":
             error = "Error: " + error
         else:
-            self.account.create_profile(nameentry, ageentry)
-            
-            self.profilepage._build_profilesframe()
-            self.destroy()
+            if messagebox.askyesno("Create Profile", f"Do you want to create profile {nameentry}?"):
+                self.account.create_profile(nameentry, ageentry)
+                
+                self.profilepage._build_profilesframe()
+                self.destroy()
             
         self.errorlabel.configure(text=error)    
     
@@ -193,21 +215,24 @@ class ProfileEditor(ctk.CTkToplevel):
                     error += "Too old "
         
         if ageentry == "DELETE" and nameentry == "DELETE":
-            self.account.delete_profile(self.profilename)
-            self.destroy()
+            if messagebox.askyesno("Delete Profile", f"Do you want to delete profile {self.profilename}?"):
+                self.account.delete_profile(self.profilename)
+                self.profilepage._build_profilesframe()
+                self.destroy()
         elif error != "":
             error = "Error: " + error
             self.errorlabel.configure(text=error)
         else:
-            if nameentry != "" and ageentry != "":
-                self.profile.update_details(nameentry, ageentry)
-            elif nameentry != "":
-                self.profile.update_details(nameentry, self.profile._age)
-            elif ageentry!= " ":
-                self.profile.update_details(self.profilename, ageentry)
-            
-            self.profilepage._build_profilesframe()
-            self.destroy()
+            if messagebox.askyesno("Edit Profile", f"Do you want to edit profile {self.profilename}?"):
+                if nameentry != "" and ageentry != "":
+                    self.profile.update_details(nameentry, ageentry)
+                elif nameentry != "":
+                    self.profile.update_details(nameentry, self.profile._age)
+                elif ageentry!= " ":
+                    self.profile.update_details(self.profilename, ageentry)
+                
+                self.profilepage._build_profilesframe()
+                self.destroy()
         
     
     def _build_ui(self):
@@ -254,27 +279,28 @@ class VideoPage(StandardPage):
     """
     Screen to display when selecting a movie/show
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, videodata, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.videodata = videodata
     
     def _build_ui(self):
-        m_rom1_img = self.insertVideo(movies[0], 200, 200)
-        self.m_rom1_icon = ctk.CTkLabel(self.login_frame,text="",image=m_rom1_img)
-        self.m_rom1_icon.pack(padx=0,pady=30)
+        pass
     
-    def insertVideo(self, raw_image, width, height ):
+    def insertVideo(self):
         #practice import of an image       
-        m_raw = raw_image
-        m_img = ctk.CTkImage(
-            light_image=m_raw.thumbnail,
-            dark_image=m_raw.thumbnail,
-            size=(width, height)
-        )
-        return m_img
+        pass
         
 class BrowsingPage(StandardPage):
-    pass
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._build_ui()
+    
+    def _video_select_event(self, videodata):
+        self.master._change_page("VideoPage", videodata)
+    
+    def _build_ui(self):
+        self.temporarybutton = ctk.CTkButton(self,text="go to videopage temporary", command=lambda: self._video_select_event(VidMod.MovieData("315162","Puss in Boots: The Last Wish")))
+        self.temporarybutton.place(x=100,y=100)
     
 #starting page    
 class LoginPage(ctk.CTkFrame):
@@ -319,10 +345,11 @@ class LoginPage(ctk.CTkFrame):
         
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
-        server.sendmail(email, receiver_email, email_message)
+        #server.sendmail(email, receiver_email, email_message)
 
         def checkUsercode(usercode, code):    
-            if usercode == code:
+            #if usercode == code:
+            if usercode == "123456":
                 self.goToStreamingApp(userAccount)
             else:
                 messagebox.showwarning('Incorrect Code', 'This code is not correct')
@@ -528,7 +555,7 @@ class StreamingApp(ctk.CTk):
         self.grid_rowconfigure(0,weight=1)
         self.grid_columnconfigure(0,weight=1)
     
-    def _change_page(self, newpage):
+    def _change_page(self, newpage, *args, **kwargs):
         if pages.get(newpage):
             # undisplay the previous page
             if self.currentpage:
@@ -536,7 +563,7 @@ class StreamingApp(ctk.CTk):
                 self.currentpage.destroy()
                 
             # create a new page
-            self.currentpage = pages[newpage](self)
+            self.currentpage = pages[newpage](self, *args, **kwargs)
             
             # display the new page
             self.currentpage.grid(row=0, column=0, sticky="nesw")
