@@ -28,8 +28,8 @@ class VideoData:
     def __init__(self, ID, name):
         self.ID = ID
         self.name = name
-        self.posterimage = ""
-        self.backdropimage = ""
+        self.backdroppath = ""
+        self.backdropimage = None
         self.age_rating = ""
         self.genres = []
         self.loaded = False
@@ -54,12 +54,18 @@ class MovieData(VideoData):
             except UnidentifiedImageError:
                 print("path", path, "could not be found")
     
+    def loadImages(self):
+        if self.loaded:
+            self.backdropimage = self.loadImage(self.backdroppath)
+    
     def load(self):
         if not self.loaded:
             #fields are id,title,backdrop_path,poster_path,genre_ids,age_rating
             data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
             if data:
-                self.backdropimage = self.loadImage(data["backdrop_path"])
+                self.backdroppath = data["backdrop_path"]
+                #moved to loadimages
+                #self.backdropimage = self.loadImage(data["backdrop_path"])
                 self.posterimage = None#self.loadImage(data["poster_path"])
                 self.genre_ids = data["genre_ids"]
                 self.age_rating = data["age_rating"]
@@ -72,6 +78,9 @@ class TVShowData(VideoData):
         super().__init__(*args, **kwargs)
     
     def loadImage(self, path):
+        pass
+    
+    def loadImages(self):
         pass
     
     def load(self):
@@ -87,5 +96,17 @@ for row in csvMod.get_all_rows("moviesdb.csv"):
     Movies.append(MovieData(row["id"], row["title"]).load())
 print("done loading, took", str(-starttime+time()), "seconds")
  
-def filter_movies():
+def filter_movies(genres, agerating):
+    pass
+
+Shows = []
+starttime = time()
+print("loading shows...")
+showsrows = csvMod.get_all_rows("")
+if showsrows:
+    for row in showsrows:
+        Shows.append(TVShowData(row["id"], row["title"]).load())
+    print("done loading, took", str(-starttime+time()), "seconds")
+
+def filter_shows(genres, agerating):
     pass
