@@ -239,5 +239,3 @@ for thread in threads:
     thread.join()
         
 print("done loading shows, took", str(-starttime+time()), "seconds")
-
-print(filter_videos(Movies, ["Action", "Adventure"], 200))
