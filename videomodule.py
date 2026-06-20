@@ -47,7 +47,7 @@ class MovieData(VideoData):
     def loadImage(self, path):
         if path:
             try:
-                ImageURL = "https://image.tmdb.org/t/p/w500" + path
+                ImageURL = "https://image.tmdb.org/t/p/w200" + path
                 response = requests.get(ImageURL)
                 information = BytesIO(response.content)
                 return Image.open(information)
@@ -60,7 +60,7 @@ class MovieData(VideoData):
             data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
             if data:
                 self.backdropimage = self.loadImage(data["backdrop_path"])
-                self.posterimage = self.loadImage(data["poster_path"])
+                self.posterimage = None#self.loadImage(data["poster_path"])
                 self.genre_ids = data["genre_ids"]
                 self.age_rating = data["age_rating"]
                 self.loaded = True
