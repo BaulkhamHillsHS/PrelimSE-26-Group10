@@ -1,4 +1,5 @@
 from PIL import Image
+from PIL import UnidentifiedImageError
 import csvmodule as csvMod
 import requests
 from io import BytesIO
@@ -44,20 +45,26 @@ class MovieData(VideoData):
         super().__init__(ID, name)
     
     def loadImage(self, path):
-        ImageURL = "https://image.tmdb.org/t/p/w500" + path
-        response = requests.get(ImageURL)
-        information = BytesIO(response.content)
-        return Image.open(information)
+        if path:
+            try:
+                ImageURL = "https://image.tmdb.org/t/p/w500" + path
+                response = requests.get(ImageURL)
+                information = BytesIO(response.content)
+                return Image.open(information)
+            except UnidentifiedImageError:
+                print("path", path, "could not be found")
     
     def load(self):
         if not self.loaded:
             #fields are id,title,backdrop_path,poster_path,genre_ids,age_rating
             data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
-            self.backdropimage = self.loadImage(data["backdrop_path"])
-            self.posterimage = self.loadImage(data["poster_path"])
-            self.genre_ids = data["genre_ids"]
-            self.age_rating = data["age_rating"]
-            return self
+            if data:
+                self.backdropimage = self.loadImage(data["backdrop_path"])
+                self.posterimage = self.loadImage(data["poster_path"])
+                self.genre_ids = data["genre_ids"]
+                self.age_rating = data["age_rating"]
+                self.loaded = True
+                return self
         
 
 class TVShowData(VideoData):
@@ -74,7 +81,7 @@ class TVShowData(VideoData):
 #Creating movie list to import into main.py
 Movies = []
 for row in csvMod.get_all_rows("moviesdb.csv"):
-    Movies.append(MovieData(row["id"], row["title"]).load())
+    Movies.append(MovieData(row["id"], row["title"]))
     
 def filter_movies():
     pass
