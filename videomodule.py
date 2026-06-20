@@ -80,8 +80,12 @@ class TVShowData(VideoData):
 
 #Creating movie list to import into main.py
 Movies = []
+from time import time
+starttime = time()
+print("loading movies...")
 for row in csvMod.get_all_rows("moviesdb.csv"):
-    Movies.append(MovieData(row["id"], row["title"]))
-    
+    Movies.append(MovieData(row["id"], row["title"]).load())
+print("done loading, took", str(-starttime+time()), "seconds")
+ 
 def filter_movies():
     pass
