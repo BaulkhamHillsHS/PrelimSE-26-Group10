@@ -25,14 +25,17 @@ class VideoData:
     Base class for tv shows and movies
     """
     AgeRatings = {"G": 0,"PG": 0,"M" : 12,"MA15+": 15,"R": 18}
-    def __init__(self, ID, name):
-        self.ID = ID
-        self.name = name
-        self.backdroppath = ""
+    def __init__(self, id, title, backdrop_path="", age_rating="", genre_ids=[], **kwargs):
+        self.ID = id
+        self.name = title
+        self.backdroppath = backdrop_path
         self.backdropimage = None
-        self.age_rating = ""
-        self.genres = []
-        self.loaded = False
+        self.age_rating = age_rating
+        self.genres = genre_ids.replace("]", "").replace("[", "").split(", ")
+        self.loaded = (id and title and backdrop_path and age_rating and genre_ids) or False
+    
+    def loadGenres(self): #convert numbers to genres
+        pass
     
     def loadImage(self, *args): # method to override
         print("override this method in class ", type(self).__name__)
@@ -41,8 +44,8 @@ class VideoData:
         pass
 
 class MovieData(VideoData):
-    def __init__(self, ID, name):
-        super().__init__(ID, name)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
     
     def loadImage(self, path):
         if path:
@@ -85,28 +88,32 @@ class TVShowData(VideoData):
     
     def load(self):
         pass
-        
+
+# function for filtering videos and movies
+def filter_videos(videos: list, genres: list, ageraating: str):
+    pass
 
 #Creating movie list to import into main.py
+WatchHistory = []
+WatchList = []
 Movies = []
+Shows = []
+
 from time import time
+
+#load in all movies into a list
 starttime = time()
 print("loading movies...")
-for row in csvMod.get_all_rows("moviesdb.csv"):
-    Movies.append(MovieData(row["id"], row["title"]).load())
-print("done loading, took", str(-starttime+time()), "seconds")
- 
-def filter_movies(genres, agerating):
-    pass
 
-Shows = []
+for row in csvMod.get_all_rows("moviesdb.csv"):
+    Movies.append(MovieData(**row))
+    
+print("done loading, took", str(-starttime+time()), "seconds")
+
+#load in all shows into a list
 starttime = time()
 print("loading shows...")
-showsrows = csvMod.get_all_rows("")
-if showsrows:
-    for row in showsrows:
-        Shows.append(TVShowData(row["id"], row["title"]).load())
-    print("done loading, took", str(-starttime+time()), "seconds")
-
-def filter_shows(genres, agerating):
-    pass
+for row in csvMod.get_all_rows(""):
+    Shows.append(TVShowData(**row))
+        
+print("done loading, took", str(-starttime+time()), "seconds")
