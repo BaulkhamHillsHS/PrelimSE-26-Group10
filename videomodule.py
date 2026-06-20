@@ -31,6 +31,7 @@ class VideoData:
         self.backdropimage = ""
         self.age_rating = ""
         self.genres = []
+        self.loaded = False
     
     def loadImage(self, *args): # method to override
         print("override this method in class ", type(self).__name__)
@@ -49,13 +50,14 @@ class MovieData(VideoData):
         return Image.open(information)
     
     def load(self):
-        #fields are id,title,backdrop_path,poster_path,genre_ids,age_rating
-        data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
-        self.backdropimage = self.loadImage(data["backdrop_path"])
-        self.posterimage = self.loadImage(data["poster_path"])
-        self.genre_ids = data["genre_ids"]
-        self.age_rating = data["age_rating"]
-        return self
+        if not self.loaded:
+            #fields are id,title,backdrop_path,poster_path,genre_ids,age_rating
+            data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
+            self.backdropimage = self.loadImage(data["backdrop_path"])
+            self.posterimage = self.loadImage(data["poster_path"])
+            self.genre_ids = data["genre_ids"]
+            self.age_rating = data["age_rating"]
+            return self
         
 
 class TVShowData(VideoData):
