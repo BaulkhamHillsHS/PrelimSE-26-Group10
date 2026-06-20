@@ -1,18 +1,17 @@
-﻿id,title,number_of_seasons,backdrop_path,poster_path,genre_ids,age_rating,,,,,
-87108,Chernobyl,1,/20eIP9o5ebArmu2HxJutaBjhLf4.jpg,/hlLXt2tOPT6RRnjiUmoxyG1LTFi.jpg,Drama,MA15+,,,,,
-88396,The Falcon and the Winter Soldier,1,/aTjbqMONy77fHJrIYu14g1F0d5h.jpg,/6kbAMLteGO8yyewYau6bJ683sw7.jpg,Action & Adventure/Drama,M,,,,,
-88329,Hawkeye,1,/1R68vl3d5s86JsS2NPjl8UoMqIS.jpg,/ct5pNE5dDHryHLDnxyZPYcqO1sz.jpg,Drama/Comedy/Action & Adventure,M,,,,,
-92830,Obi-Wan Kenobi,1,/vNPm1WG15IJHpsemb9ZRurm4ZC4.jpg,/qJRB789ceLryrLvOKrZqLKr2CGf.jpg,Sci-Fi & Fantasy/Action & Adventure,M,,,,,
-61859,The Night Manager,2,/86Lac0EmcXyKM40MC9yjRHI62hk.jpg,/hdCC5N42cXERbzIn6ED7oqTKtkq.jpg,Drama/Mystery/Crime,MA15+,,,,,
-87739,The Queen's Gambit,1,/34OGjFEbHj0E3lE2w0iTUVq0CBz.jpg,/zU0htwkhNvBQdVSIKB9s6hgVeFK.jpg,Drama,M,,,,,
-84773,The Lord of the Rings: The Rings of Power,1,/1rO4xoCo4Z5WubK0OwdVll3DPYo.jpg,/mYLOqiStMxDK3fYZFirgrMt8z5d.jpg,Action & Adventure/Sci-Fi & Fantasy/Drama,M,,,,,
-93405,Squid Game,3,/2meX1nMdScFOoV4370rqHWKmXhY.jpg,/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg,Action & Adventure/Mystery/Drama,MA15+,,,,,
-85271,WandaVision,1,/lOr9NKxh4vMweufMOUDJjJhCRHW.jpg,/frobUz2X5Pc8OiVZU8Oo5K3NKMM.jpg,Sci-Fi & Fantasy/Mystery/Drama,M,,,,,
-100088,The Last of Us,1,/uDgy6hyPd82kOHh6I95FLtLnj6p.jpg,/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg,Drama,MA15+,,,,,
-91363,What If...?,1,/4N6zEMfZ57zNEQcM8gWeERFupMv.jpg,/lztz5XBMG1x6Y5ubz7CxfPFsAcW.jpg,Animation/Action & Adventure/Sci-Fi & Fantasy,PG,,,,,
-94605,Arcane,2,/rkB4LyZHo1NHXFEDHl9vSD9r1lI.jpg,/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg,Animation/Drama/Sci-Fi & Fantasy/Action & Adventure,MA15+,,,,,
-96648,Sweet Home,2,/mceCXNTny6a5F3rQgShLoyARw4l.jpg,/1h4OqxXYRRM2FA3Nu6GBgD3puJj.jpg,Drama/Sci-Fi & Fantasy,MA15+,,,,,
-105248,Cyberpunk: Edgerunners,1,/gLlemMoIN4vbKvZvOWInWGxeQNL.jpg,/7jSWOc6jWSw5hZ78HB8Hw3pJxuk.jpg,Action & Adventure/Animation/Sci-Fi & Fantasy,MA15+,,,,,
-95557,Invincible,4,/6UH52Fmau8RPsMAbQbjwN3wJSCj.jpg,/lxVS24ZhG3WQf3IMbkFIg6olT6A.jpg,Animation/Sci-Fi & Fantasy/Action & Adventure/Drama,R18+,,,,,
-99966,All of Us Are Dead,2,/jZAtLKNZbQZZLm9OLcY9rdZZV5F.jpg,/pTEFqAjLd5YTsMD6NSUxV6Dq7A6.jpg,Action & Adventure/Drama/Sci-Fi & Fantasy,MA15+,,,,,
-71915,Good Omens,2,/mvmOcBT0WhyRmSpkhhBgdtp7GSL.jpg,/1ibIjP6puA4y2SfCn9icSehHrBu.jpg,Sci-Fi & Fantasy/Comedy/Drama,M,,,,,
+id,name,number_of_seasons,backdrop_path,poster_path,genres,age_rating
+87108,Chernobyl,1,/20eIP9o5ebArmu2HxJutaBjhLf4.jpg,/hlLXt2tOPT6RRnjiUmoxyG1LTFi.jpg,Drama,MA15+
+88396,The Falcon and the Winter Soldier,1,/aTjbqMONy77fHJrIYu14g1F0d5h.jpg,/6kbAMLteGO8yyewYau6bJ683sw7.jpg,Action & Adventure/Drama,M
+88329,Hawkeye,1,/1R68vl3d5s86JsS2NPjl8UoMqIS.jpg,/ct5pNE5dDHryHLDnxyZPYcqO1sz.jpg,Drama/Comedy/Action & Adventure,M
+92830,Obi-Wan Kenobi,1,/vNPm1WG15IJHpsemb9ZRurm4ZC4.jpg,/qJRB789ceLryrLvOKrZqLKr2CGf.jpg,Sci-Fi & Fantasy/Action & Adventure,M
+61859,The Night Manager,2,/86Lac0EmcXyKM40MC9yjRHI62hk.jpg,/hdCC5N42cXERbzIn6ED7oqTKtkq.jpg,Drama/Mystery/Crime,MA15+
+87739,The Queen's Gambit,1,/34OGjFEbHj0E3lE2w0iTUVq0CBz.jpg,/zU0htwkhNvBQdVSIKB9s6hgVeFK.jpg,Drama,M
+84773,The Lord of the Rings: The Rings of Power,1,/1rO4xoCo4Z5WubK0OwdVll3DPYo.jpg,/mYLOqiStMxDK3fYZFirgrMt8z5d.jpg,Action & Adventure/Sci-Fi & Fantasy/Drama,M
+93405,Squid Game,3,/2meX1nMdScFOoV4370rqHWKmXhY.jpg,/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg,Action & Adventure/Mystery/Drama,MA15+
+85271,WandaVision,1,/lOr9NKxh4vMweufMOUDJjJhCRHW.jpg,/frobUz2X5Pc8OiVZU8Oo5K3NKMM.jpg,Sci-Fi & Fantasy/Mystery/Drama,M
+100088,The Last of Us,1,/uDgy6hyPd82kOHh6I95FLtLnj6p.jpg,/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg,Drama,MA15+
+91363,What If...?,1,/4N6zEMfZ57zNEQcM8gWeERFupMv.jpg,/lztz5XBMG1x6Y5ubz7CxfPFsAcW.jpg,Animation/Action & Adventure/Sci-Fi & Fantasy,PG
+94605,Arcane,2,/rkB4LyZHo1NHXFEDHl9vSD9r1lI.jpg,/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg,Animation/Drama/Sci-Fi & Fantasy/Action & Adventure,MA15+
+96648,Sweet Home,2,/mceCXNTny6a5F3rQgShLoyARw4l.jpg,/1h4OqxXYRRM2FA3Nu6GBgD3puJj.jpg,Drama/Sci-Fi & Fantasy,MA15+
+105248,Cyberpunk: Edgerunners,1,/gLlemMoIN4vbKvZvOWInWGxeQNL.jpg,/7jSWOc6jWSw5hZ78HB8Hw3pJxuk.jpg,Action & Adventure/Animation/Sci-Fi & Fantasy,MA15+
+95557,Invincible,3,/6UH52Fmau8RPsMAbQbjwN3wJSCj.jpg,/lxVS24ZhG3WQf3IMbkFIg6olT6A.jpg,Animation/Sci-Fi & Fantasy/Action & Adventure/Drama,R18+
+71915,Good Omens,2,/mvmOcBT0WhyRmSpkhhBgdtp7GSL.jpg,/1ibIjP6puA4y2SfCn9icSehHrBu.jpg,Sci-Fi & Fantasy/Comedy/Drama,M
