@@ -18,6 +18,12 @@ def find_row(filename, fields_to_search: list, data: dict):
     elif filename == "moviesdb.csv":
         f = open("moviesdb.csv", mode="r", newline="")
     
+    elif filename == "shows.csv":
+        f = open("shows.csv", mode="r", newline="")
+    
+    elif filename == "episodes.csv":
+        f = open("episodes.csv", mode="r", newline="")
+    
     else:
         print("Invalid file name")
         return False
@@ -45,8 +51,6 @@ def edit_row(filename, fields_to_search: list, data: dict, newdata: dict):
         readf = open("profiles.csv", mode="r", newline="")
     elif filename == "accounts.csv":
         readf = open("accounts.csv", mode="r", newline="")
-    elif filename == "moviesdb.csv":
-        readf = open("moviesdb.csv", mode="r", newline="")
     else:
         print("Invalid file name")
         return False
@@ -144,6 +148,12 @@ def get_all_rows(filename):
     
     elif filename == "moviesdb.csv":
         f = open("moviesdb.csv", mode="r", newline="")
+    
+    elif filename == "shows.csv":
+        f = open("shows.csv", mode="r", newline="")
+    
+    elif filename == "episodes.csv":
+        f = open("episodes.csv", mode="r", newline="")
     
     else:
         print("Invalid file name")
