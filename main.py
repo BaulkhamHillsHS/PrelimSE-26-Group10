@@ -395,11 +395,10 @@ class LoginPage(ctk.CTkFrame):
         
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
-        #server.sendmail(email, receiver_email, email_message)
+        server.sendmail(email, receiver_email, email_message)
 
         def checkUsercode(usercode, code):    
-            #if usercode == code:
-            if usercode == "123456":
+            if usercode == code:
                 self.goToStreamingApp(userAccount)
             else:
                 messagebox.showwarning('Incorrect Code', 'This code is not correct')
@@ -409,6 +408,7 @@ class LoginPage(ctk.CTkFrame):
         #uses  account modules login function to check if account exists
         userAccount = AccMod.login(email, password)
         if userAccount != False:
+            messagebox.showwarning('Login Sucessful', 'You have sucessfully logged in!')
             self.twoFactAuth(userAccount, email)                        
         elif not email or not password: 
             messagebox.showwarning('Details Missing', 'Please enter both email and password')
@@ -422,21 +422,15 @@ class LoginPage(ctk.CTkFrame):
         
         self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
         self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
-        
-        self.label = ctk.CTkLabel(self, text="Email", text_color=ColourScheme.Text, font=("arial", 20))
-        self.label.grid(row=1, column=1, padx=20, pady=5, sticky="ew")
-        
+                
         self.email_entry = ctk.CTkEntry(self, placeholder_text="Enter your email", height=30)
-        self.email_entry.grid(row=2,column=1,padx=20,pady=5, sticky= "ew")
-        
-        self.label = ctk.CTkLabel(self, text="Password", text_color=ColourScheme.Text, font=("arial", 20))
-        self.label.grid(row=3, column=1, padx=20, pady=5, sticky="ew")
+        self.email_entry.grid(row=1,column=1,padx=20,pady=5, sticky= "ew")
         
         self.password_entry = ctk.CTkEntry(self, placeholder_text="Enter your password", height=30)
-        self.password_entry.grid(row=4, column=1, padx=20, pady=5, sticky="ew")
+        self.password_entry.grid(row=2, column=1, padx=20, pady=5, sticky="ew")
         
         self.login_button = ctk.CTkButton(self, text="Login", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=lambda: self.Login(self.email_entry.get(), self.password_entry.get()))
-        self.login_button.grid(row=5, column=1, padx=40, pady=5, sticky="ew")
+        self.login_button.grid(row=3, column=1, padx=100, pady=5, sticky="ew")
 
 #page after logging into an account
 # I need to fix it as it doesnt immeditatley load the updataed plan + it needs to print a TXT recpiet file
@@ -503,7 +497,45 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         ## popup that ask you if you are sure that you want to change the plan
         ## txt file showing supscription invoice after change of plan
         
+class MenuPage(ctk.CTkFrame):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
+        self._build_ui()
+    def _build_ui(self):
+        account : AccMod.Account = self.master.account
+        self.grid_columnconfigure((0,1,2), weight=1)
+        self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
+        
+        self.label = ctk.CTkLabel(self, text="MENU", text_color=ColourScheme.Text, font=("arial", 40))
+        self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
+        
+        def go_browsing():
+            app._change_page("BrowsingPage")
 
+        self.browse_button = ctk.CTkButton(self, text="Browsing Page", command=go_browsing)
+        self.browse_button.grid(row=1, column=1, padx=20, pady=5, sticky="ew")
+        
+        def view_report():
+            #enter watchlist code
+            pass
+            
+        self.watchlist_button = ctk.CTkButton(self, text="Download Viewing Report", command=view_report)
+        self.watchlist_button.grid(row=2, column=1, padx=20, pady=5, sticky="ew")
+        
+        def return_profile():
+            app._change_page("ProfilePage")
+
+        self.return_button = ctk.CTkButton(self, text="Return to Profiles", command=return_profile)
+        self.return_button.grid(row=3, column=1, padx=20, pady=5, sticky="ew")
+        
+        def exit_application():
+           pass
+
+        self.exit_button = ctk.CTkButton(self, text="Exit Application", command=return_profile)
+        self.exit_button.grid(row=4, column=1, padx=20, pady=5, sticky="ew")
+        
+        
+        
         
 class ProfilePage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
@@ -517,10 +549,10 @@ class ProfilePage(ctk.CTkFrame):
             # enter the profile editor
             editor = ProfileEditor(self, self.master.account, profilename)
         else:
-            # enter browsing page with the profile
+            # enters menu page with the profile
             self.master.profile = AccMod.Profile(self.master.account, profilename)
             if self.master.profile.load_from_csv():
-                self.master._change_page("BrowsingPage")
+                self.master._change_page("MenuPage")
     
     def _build_profilesframe(self):
         if self.profilesframe:
@@ -590,7 +622,8 @@ pages : dict = {"StandardPage": StandardPage,
                 "BrowsingPage": BrowsingPage, 
                 "SubscriptionManagementPage": SubscriptionManagementPage, 
                 "LoginPage": LoginPage, 
-                "ProfilePage": ProfilePage}
+                "ProfilePage": ProfilePage,
+                "MenuPage": MenuPage}
 
 class StreamingApp(ctk.CTk):
     Title = "App"
