@@ -91,7 +91,7 @@ class MovieData(VideoData):
                 self.genre_ids = data["genre_ids"]
                 self.age_rating = data["age_rating"]
                 self.loaded = True
-                return self
+        return self
         
 class TVEpisodeData:
     def __init__(self, episode_id, show, season, episode_num, episode_title, backdrop_img, *args, **kwargs):
@@ -170,7 +170,7 @@ class TVShowData(VideoData):
                 self.genre_ids = data["genre_ids"]
                 self.age_rating = data["age_rating"]
                 self.loaded = True
-                return self
+        return self
 
 # function for filtering videos and movies
 def filter_videos(videos: list, genres: list, agerating: int):

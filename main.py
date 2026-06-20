@@ -30,7 +30,7 @@ class ColourScheme: # for colours that won't change throughout whole app
 class VideoWidget(ctk.CTkFrame):
     def __init__(self, master, data, width=40, height=80, *args, **kwargs):
         super().__init__(master, *args, width=width,height=height, **kwargs)
-        self.data : VidMod.VideoData = data
+        self.data = data
         self._build_ui(width, height)
     
     def _video_select(self):
@@ -79,9 +79,13 @@ class VideoScrollFrameWidget(ctk.CTkFrame):
         self.scrollableframe._video_select_event = self._video_select_event
         
         if self.videos:
+            i = 0
             for video in self.videos:
+                print(video)
+                print(video.load())
                 video = VideoWidget(self.scrollableframe,video.load())
-                video.grid(row=0,column=0)
+                video.grid(row=0,column=i)
+                i+=1
         
 class ProfileWidget(ctk.CTkFrame):
     profileimage = Image.open("Images/userimage.png")
@@ -328,25 +332,32 @@ class BrowsingPage(StandardPage):
         self._build_ui()
     
     def _video_select_event(self, videodata):
+        if videodata.id not in self.master.profile._history:
+            if self.master.profile._history == [""]:
+                self.master.profile._history = [videodata.id]
+            else:
+                self.master.profile._history.append(videodata.id)
+                
+            self.master.profile.save_to_csv()
         self.master._change_page("VideoPage", videodata)
     
     def _build_ui(self):
         self.grid_columnconfigure((0), weight=1)
         self.grid_rowconfigure((0,1,2,3,4,5,6,7,8), weight=1)
-        self.verticalscrollframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Background)
-        self.verticalscrollframe.grid(row=1, rowspan=7,column=0,sticky="nesw")
-        self.verticalscrollframe.grid_rowconfigure((0, 1),weight=1)
+        self.verticalscrollframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Background,width=1000)
+        self.verticalscrollframe.grid(row=1, rowspan=7,column=0,sticky="w")
+        self.verticalscrollframe.grid_rowconfigure((0, 1,2,3,4),weight=1)
         
-        self.showscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "TV Shows", None, fg_color=ColourScheme.Foreground)
+        self.showscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "TV Shows", VidMod.Shows, fg_color=ColourScheme.Foreground)
         self.showscrollframe.grid(row=1,column=0, sticky="nesw")
         
         self.moviescrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Movies", VidMod.Movies, fg_color=ColourScheme.Foreground)
         self.moviescrollframe.grid(row=2,column=0, sticky="nesw")
         
-        self.watchhistoryscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch History", None, fg_color=ColourScheme.Foreground)
+        self.watchhistoryscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch History", VidMod.videos_from_ids(self.master.profile._history), fg_color=ColourScheme.Foreground)
         self.watchhistoryscrollframe.grid(row=3,column=0, sticky="nesw")
         
-        self.watchlistscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch List", None, fg_color=ColourScheme.Foreground)
+        self.watchlistscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch List", VidMod.videos_from_ids(self.master.profile._watchlist), fg_color=ColourScheme.Foreground)
         self.watchlistscrollframe.grid(row=4,column=0, sticky="nesw")
         
         self.temporarybutton = ctk.CTkButton(self,text="go to videopage temporary", command=lambda: self._video_select_event(VidMod.MovieData("315162","Puss in Boots: The Last Wish").load()))
