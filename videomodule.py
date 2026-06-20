@@ -231,8 +231,8 @@ for row in csvMod.get_all_rows("shows.csv"):
     Shows.append(TVShowData(**row).loadEpisodes())
     
 threads = []
-for movie in Movies:
-    threads.append(Thread(target=movie.loadImages))
+for show in Shows:
+    threads.append(Thread(target=show.loadImages))
     threads[-1].start()
 
 for thread in threads:
