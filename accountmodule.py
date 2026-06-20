@@ -23,6 +23,7 @@ class Profile:
         self._profilename = name
         self._age = 0
         self._history: list = []
+        self._watchlist: list = []
         self._theme = Theme()
         self.load_from_csv()
 
@@ -46,7 +47,8 @@ class Profile:
         edit_row("profiles.csv", 
                  ["accountemail", "profilename"], 
                  {"accountemail" : self._account._email, "profilename": self._profilename}, 
-                 {"watchhistory": "/".join(self._history)})
+                 {"watchhistory": "/".join(self._history),
+                  "watchlist": "/".join(self._watchlist)})
                 
     def load_from_csv(self):
         data = find_row("profiles.csv", 
@@ -55,6 +57,7 @@ class Profile:
         if data:
             self._age = data["age"]
             self._history = data["watchhistory"].split("/")
+            self._watchlist = data["watchlist"].split("/")
             return True
         else:
             print("profile not found")
