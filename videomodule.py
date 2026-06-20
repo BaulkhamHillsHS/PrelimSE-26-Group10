@@ -37,15 +37,8 @@ class VideoData:
     def loadGenres(self): #convert numbers to genres
         pass
     
-    def loadImage(self, *args): # method to override
-        print("override this method in class ", type(self).__name__)
-    
     def load(self): # method to override
         pass
-
-class MovieData(VideoData):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
     
     def loadImage(self, path):
         if path:
@@ -60,6 +53,10 @@ class MovieData(VideoData):
     def loadImages(self):
         if self.loaded:
             self.backdropimage = self.loadImage(self.backdroppath)
+
+class MovieData(VideoData):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
     
     def load(self):
         if not self.loaded:
@@ -79,15 +76,22 @@ class MovieData(VideoData):
 class TVShowData(VideoData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-    
-    def loadImage(self, path):
-        pass
-    
-    def loadImages(self):
-        pass
+        self.seasons = kwargs.get("number_of_seasons")
+        if not kwargs.get("number_of_seasons"):
+            self.loaded = False
     
     def load(self):
-        pass
+        if not self.loaded:
+            #fields are id,title,backdrop_path,poster_path,genre_ids,age_rating
+            data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
+            if data:
+                self.backdroppath = data["backdrop_path"]
+                self.seasons = data["number_of_seasons"]
+                self.posterimage = None
+                self.genre_ids = data["genre_ids"]
+                self.age_rating = data["age_rating"]
+                self.loaded = True
+                return self
 
 # function for filtering videos and movies
 def filter_videos(videos: list, genres: list, ageraating: str):
@@ -113,7 +117,9 @@ print("done loading, took", str(-starttime+time()), "seconds")
 #load in all shows into a list
 starttime = time()
 print("loading shows...")
-for row in csvMod.get_all_rows(""):
+
+for row in csvMod.get_all_rows("shows.csv"):
+    row["id"] = row["\ufeffid"] #idk why but \ufeff combined with the id field in the csv
     Shows.append(TVShowData(**row))
         
 print("done loading, took", str(-starttime+time()), "seconds")
