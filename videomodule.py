@@ -31,10 +31,6 @@ class VideoData:
         self.backdropimage = ""
         self.age_rating = ""
         self.genres = []
-        
-        #prevents someone from accidentily setting an age rating that is not included in the filters
-        if self.age_rating not in self.AgeRatings:
-            raise Exception(self.age_rating + " is not an accepted age rating")
     
     def loadImage(self, *args): # method to override
         print("override this method in class ", type(self).__name__)
@@ -73,5 +69,6 @@ class TVShowData(VideoData):
         
 
 #Creating movie list to import into main.py
-
-movies = []
+Movies = []
+for row in csvMod.get_all_rows("moviesdb.csv"):
+    Movies.append(MovieData(row["id"], row["title"]))
