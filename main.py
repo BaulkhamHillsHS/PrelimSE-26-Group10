@@ -56,6 +56,32 @@ class VideoWidget(ctk.CTkFrame):
             
         self.infolabel = ctk.CTkLabel(self, text=info,font=FontStyle.Text,text_color=ColourScheme.Text,fg_color=ColourScheme.Background)
         self.infolabel.grid(column=0,row=6,sticky="nesw")
+
+class VideoScrollFrameWidget(ctk.CTkFrame):
+    def __init__(self, master, title: str, videos: list[VidMod.VideoData], *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+        self.title = title
+        self.videos = videos
+        self._build_ui()
+    
+    def _video_select_event(self):
+        self.master._video_select_event()
+    
+    def _build_ui(self):
+        self.grid_rowconfigure((0,1,2,3),weight=1)
+        self.grid_columnconfigure((0),weight=1)
+        self.label = ctk.CTkLabel(self, text=self.title,text_color=ColourScheme.Text,font=FontStyle.Subtitle,fg_color=ColourScheme.Foreground)
+        self.label.grid(row=0,column=0)
+        
+        #hold all the video widgets
+        self.scrollableframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Foreground,orientation="horizontal")
+        self.scrollableframe.grid(row=1,rowspan=3,column=0, sticky="nesw")
+        self.scrollableframe._video_select_event = self._video_select_event
+        
+        if self.videos:
+            for video in self.videos:
+                video = VideoWidget(self.scrollableframe,video.load())
+                video.grid(row=0,column=0)
         
 class ProfileWidget(ctk.CTkFrame):
     profileimage = Image.open("Images/userimage.png")
@@ -270,7 +296,7 @@ class StandardPage(ctk.CTkFrame):
     Parent class for pages that can be accessed when in a profile
     """
     def __init__(self, master, *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
+        super().__init__(master, *args, fg_color=ColourScheme.Background, **kwargs)
     
     def _build_ui(self): #method to be overriden
         pass
@@ -288,6 +314,7 @@ class VideoPage(StandardPage):
     def _build_ui(self):
         self.grid_columnconfigure((0),weight=1)
         self.grid_rowconfigure((0),weight=1)
+        #don't use the videowidget class for this page i was just testing
         self.videoimage = VideoWidget(self, self.videodata, width=700,height=500)
         self.videoimage.grid(row=0, column=0)
     
@@ -304,6 +331,18 @@ class BrowsingPage(StandardPage):
         self.master._change_page("VideoPage", videodata)
     
     def _build_ui(self):
+        self.grid_columnconfigure((0), weight=1)
+        self.grid_rowconfigure((0,1,2,3,4,5,6,7,8), weight=1)
+        self.verticalscrollframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Background)
+        self.verticalscrollframe.grid(row=1, rowspan=7,column=0,sticky="nesw")
+        self.verticalscrollframe.grid_rowconfigure((0, 1),weight=1)
+        
+        self.showscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "TV Shows", None, fg_color=ColourScheme.Foreground)
+        self.showscrollframe.grid(row=1,column=0, sticky="nesw")
+        
+        self.moviescrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Movies", VidMod.Movies, fg_color=ColourScheme.Foreground)
+        self.moviescrollframe.grid(row=2,column=0, sticky="nesw")
+        
         self.temporarybutton = ctk.CTkButton(self,text="go to videopage temporary", command=lambda: self._video_select_event(VidMod.MovieData("315162","Puss in Boots: The Last Wish").load()))
         self.temporarybutton.place(x=100,y=100)
     

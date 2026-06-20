@@ -1,4 +1,5 @@
 from PIL import Image
+from PIL import UnidentifiedImageError
 import csvmodule as csvMod
 import requests
 from io import BytesIO
@@ -27,10 +28,11 @@ class VideoData:
     def __init__(self, ID, name):
         self.ID = ID
         self.name = name
-        self.posterimage = ""
-        self.backdropimage = ""
+        self.backdroppath = ""
+        self.backdropimage = None
         self.age_rating = ""
         self.genres = []
+        self.loaded = False
     
     def loadImage(self, *args): # method to override
         print("override this method in class ", type(self).__name__)
@@ -43,19 +45,32 @@ class MovieData(VideoData):
         super().__init__(ID, name)
     
     def loadImage(self, path):
-        ImageURL = "https://image.tmdb.org/t/p/w500" + path
-        response = requests.get(ImageURL)
-        information = BytesIO(response.content)
-        return Image.open(information)
+        if path:
+            try:
+                ImageURL = "https://image.tmdb.org/t/p/w200" + path
+                response = requests.get(ImageURL)
+                information = BytesIO(response.content)
+                return Image.open(information)
+            except UnidentifiedImageError:
+                print("path", path, "could not be found")
+    
+    def loadImages(self):
+        if self.loaded:
+            self.backdropimage = self.loadImage(self.backdroppath)
     
     def load(self):
-        #fields are id,title,backdrop_path,poster_path,genre_ids,age_rating
-        data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
-        self.backdropimage = self.loadImage(data["backdrop_path"])
-        self.posterimage = self.loadImage(data["poster_path"])
-        self.genre_ids = data["genre_ids"]
-        self.age_rating = data["age_rating"]
-        return self
+        if not self.loaded:
+            #fields are id,title,backdrop_path,poster_path,genre_ids,age_rating
+            data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
+            if data:
+                self.backdroppath = data["backdrop_path"]
+                #moved to loadimages
+                #self.backdropimage = self.loadImage(data["backdrop_path"])
+                self.posterimage = None#self.loadImage(data["poster_path"])
+                self.genre_ids = data["genre_ids"]
+                self.age_rating = data["age_rating"]
+                self.loaded = True
+                return self
         
 
 class TVShowData(VideoData):
@@ -65,11 +80,33 @@ class TVShowData(VideoData):
     def loadImage(self, path):
         pass
     
+    def loadImages(self):
+        pass
+    
     def load(self):
         pass
         
 
 #Creating movie list to import into main.py
 Movies = []
+from time import time
+starttime = time()
+print("loading movies...")
 for row in csvMod.get_all_rows("moviesdb.csv"):
-    Movies.append(MovieData(row["id"], row["title"]))
+    Movies.append(MovieData(row["id"], row["title"]).load())
+print("done loading, took", str(-starttime+time()), "seconds")
+ 
+def filter_movies(genres, agerating):
+    pass
+
+Shows = []
+starttime = time()
+print("loading shows...")
+showsrows = csvMod.get_all_rows("")
+if showsrows:
+    for row in showsrows:
+        Shows.append(TVShowData(row["id"], row["title"]).load())
+    print("done loading, took", str(-starttime+time()), "seconds")
+
+def filter_shows(genres, agerating):
+    pass
