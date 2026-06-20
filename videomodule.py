@@ -25,13 +25,13 @@ class VideoData:
     Base class for tv shows and movies
     """
     AgeRatings = {"G": 0,"PG": 0,"M" : 12,"MA15+": 15,"R": 18}
-    def __init__(self, id, title, backdrop_path="", age_rating="", genre_ids=[], **kwargs):
+    def __init__(self, id, title, backdrop_path="", age_rating="", genre_ids="", **kwargs):
         self.ID = id
         self.name = title
         self.backdroppath = backdrop_path
         self.backdropimage = None
         self.age_rating = age_rating
-        self.genres = genre_ids.replace("]", "").replace("[", "").split(", ")
+        self.genre_ids = genre_ids.replace("]", "").replace("[", "").split(", ")
         self.loaded = (id and title and backdrop_path and age_rating and genre_ids) or False
     
     def loadGenres(self): #convert numbers to genres
@@ -72,13 +72,59 @@ class MovieData(VideoData):
                 self.loaded = True
                 return self
         
+class TVEpisodeData:
+    def __init__(self, episode_id, show, season, episode_num, episode_title, backdrop_img, *args, **kwargs):
+        self.id = episode_id
+        self.show = show
+        self.season = season
+        self.episode = episode_num
+        self.title = episode_title
+        self.backdroppath = backdrop_img
+    
+    def loadImage(self):
+        path = self.backdroppath
+        if path:
+            try:
+                ImageURL = "https://image.tmdb.org/t/p/w200" + path
+                response = requests.get(ImageURL)
+                information = BytesIO(response.content)
+                return Image.open(information)
+            except UnidentifiedImageError:
+                print("path", path, "could not be found")
 
 class TVShowData(VideoData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.seasons = kwargs.get("number_of_seasons")
+        self.episodes = []
         if not kwargs.get("number_of_seasons"):
             self.loaded = False
+        if self.loaded:
+            self.loadEpisodes()
+    
+    def loadEpisodes(self):
+        prevFound = True
+        row = None
+        season = 0
+        episode = 1
+        while prevFound != False:
+            if not row:
+                prevFound = False
+                season += 1
+                episode = 1
+            else:
+                episode += 1
+                
+            row = csvMod.find_row("episodes.csv", ["show", "season", "episode_num"],
+                                        {"show": self.name,
+                                         "season": str(season),
+                                         "episode_num": str(episode)})
+            if row:
+                print(self.name, "season", season, "episode", episode, "found")
+                self.episodes.append(TVEpisodeData(**row))
+                prevFound = True
+        return self
+            
     
     def load(self):
         if not self.loaded:
@@ -119,7 +165,6 @@ starttime = time()
 print("loading shows...")
 
 for row in csvMod.get_all_rows("shows.csv"):
-    row["id"] = row["\ufeffid"] #idk why but \ufeff combined with the id field in the csv
-    Shows.append(TVShowData(**row))
+    Shows.append(TVShowData(**row).loadEpisodes())
         
 print("done loading, took", str(-starttime+time()), "seconds")
