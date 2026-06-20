@@ -186,8 +186,6 @@ def filter_videos(videos: list, genres: list, agerating: int):
     return indexes
 
 #Creating movie list to import into main.py
-WatchHistory = []
-WatchList = []
 Movies = []
 Shows = []
 
