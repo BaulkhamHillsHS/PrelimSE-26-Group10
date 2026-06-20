@@ -234,7 +234,6 @@ for row in csvMod.get_all_rows("shows.csv"):
     
 threads = []
 for show in Shows:
-    print(show.genres)
     threads.append(Thread(target=show.loadImages))
     threads[-1].start()
 
