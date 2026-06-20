@@ -55,6 +55,7 @@ class MovieData(VideoData):
         self.posterimage = self.loadImage(data["poster_path"])
         self.genre_ids = data["genre_ids"]
         self.age_rating = data["age_rating"]
+        return self
         
 
 class TVShowData(VideoData):
