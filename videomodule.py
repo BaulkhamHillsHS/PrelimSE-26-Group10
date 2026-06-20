@@ -5,19 +5,35 @@ import csvmodule as csvMod
 import requests
 from io import BytesIO
 
-#getting images
-i_rom1 = Image.open("Images/Movies/Play_Movie/Romance1.png")
-i_rom2 = Image.open("Images/Movies/Play_Movie/Romance2.png")
-i_rom3 = Image.open("Images/Movies/Play_Movie/Romance3.png")
-i_rom4 = Image.open("Images/Movies/Play_Movie/Romance4.png")
-i_hor1 = Image.open("Images/Movies/Play_Movie/Horror1.png")
-i_hor2 = Image.open("Images/Movies/Play_Movie/Horror2.png")
-i_hor3 = Image.open("Images/Movies/Play_Movie/Horror3.png")
-i_hor4 = Image.open("Images/Movies/Play_Movie/Horror4.png")
-i_act1 = Image.open("Images/Movies/Play_Movie/Action1.png")
-i_act2 = Image.open("Images/Movies/Play_Movie/Action2.png")
-i_act3 = Image.open("Images/Movies/Play_Movie/Action3.png")
-i_act4 = Image.open("Images/Movies/Play_Movie/Action4.png")
+genres = {
+    "28" : "Action" ,
+    "12" : "Adventure" ,
+    "16" : "Animation" ,
+    "35" : "Comedy" ,
+    "80" : "Crime" ,
+    "99" : "Documentary" ,
+    "18" : "Drama" ,
+    "10751" : "Family" ,
+    "14" : "Fantasy" ,
+    "36" : "History" ,
+    "27" : "Horror" ,
+    "10402" : "Music" ,
+    "9648" : "Mystery" ,
+    "10749" : "Romance" ,
+    "878" : "Science Fiction" ,
+    "10770" : "TV Movie" ,
+    "53" : "Thriller" ,
+    "10752" : "War" ,
+    "37" : "Western" ,
+    "10759" : "Action & Adventure" ,
+    "10762" : "Kids" ,
+    "10763" : "News" ,
+    "10764" : "Reality" ,
+    "10765" : "Sci-Fi & Fantasy" ,
+    "10766" : "Soap" ,
+    "10767" : "Talk" ,
+    "10768" : "War & Politics" 
+}
 
 # classes and functions related to videos 
 # e.g. filtering
@@ -32,7 +48,11 @@ class VideoData:
         self.backdroppath = backdrop_path
         self.backdropimage = None
         self.age_rating = age_rating
-        self.genre_ids = genre_ids.replace("]", "").replace("[", "").split(", ")
+        self.genres = []
+        genre_ids = genre_ids.replace("]", "").replace("[", "").split(", ")
+        for genre_id in genre_ids:
+            if genres.get(genre_id):
+                self.genres.append(genres.get(genre_id))
         self.loaded = (id and title and backdrop_path and age_rating and genre_ids) or False
     
     def loadGenres(self): #convert numbers to genres
@@ -52,7 +72,7 @@ class VideoData:
                 print("path", path, "could not be found")
     
     def loadImages(self):
-        if self.loaded:
+        if self.loaded and not self.backdropimage and self.backdroppath:
             self.backdropimage = self.loadImage(self.backdroppath)
 
 class MovieData(VideoData):
@@ -126,8 +146,10 @@ class TVShowData(VideoData):
                 print(self.name, "season", season, "episode", episode, "found")
                 self.episodes.append(TVEpisodeData(**row))
                 prevFound = True
-                threads = []
-                
+        return self
+    
+    def loadEpisodeImages(self):
+        threads = []
         for episode in self.episodes:
             threads.append(Thread(target=episode.loadImage))
             threads[-1].start()
@@ -151,8 +173,17 @@ class TVShowData(VideoData):
                 return self
 
 # function for filtering videos and movies
-def filter_videos(videos: list, genres: list, ageraating: str):
-    pass
+def filter_videos(videos: list, genres: list, agerating: int):
+    indexes = []
+    for i in range(len(videos)):
+        video = videos[i]
+        for genre in genres:
+            if genre in video.genres:
+                if VideoData.AgeRatings[video.age_rating] <= agerating:
+                    videos[i].loadImages()
+                    indexes.append(i)
+                    break
+    return indexes
 
 #Creating movie list to import into main.py
 WatchHistory = []
@@ -195,3 +226,5 @@ for thread in threads:
     thread.join()
         
 print("done loading shows, took", str(-starttime+time()), "seconds")
+
+print(filter_videos(Movies, ["Action", "Adventure"], 200))
