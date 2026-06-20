@@ -189,18 +189,28 @@ def filter_videos(videos: list, genres: list, agerating: int):
 
 def videos_from_ids(ids):
     found = []
-    for movie in Movies:
+    for movie in Movies + Shows:
         if movie.id in ids:
             found.append(movie)
     for show in Shows:
         if show.id in ids:
             found.append(show)
     
-    newfoundlist = []
+    reorderedfound = list(range(len(ids)))
+    
+    # retain the ordering of the ids parameter
     for video in found:
-        newfoundlist[ids.index(video.id)] = video
+        print(video.name)
+        if "Movie" in type(video).__name__:
+            reorderedfound[ids.index(video.id)] = video
+        elif "Show" in type(video).__name__:
+            reorderedfound[ids.index(video.id)] = video
+    resultlist = []
+    for value in reorderedfound:
+        if not type(value) == int:
+            resultlist.append(value)
         
-    return newfoundlist
+    return resultlist
 
 #Creating movie list to import into main.py
 Movies = []

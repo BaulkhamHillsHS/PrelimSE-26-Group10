@@ -353,9 +353,11 @@ class BrowsingPage(StandardPage):
         screenheight = self.master.winfo_screenheight()
         self.grid_columnconfigure((0), weight=1)
         self.grid_rowconfigure((0,1,2,3,4,5,6,7,8), weight=1)
-        self.verticalscrollframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Background,width=screenwidth, height=screenheight*5/7)
-        self.verticalscrollframe.grid(row=1, rowspan=7,column=0,sticky="w")
+        
+        self.verticalscrollframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Background,width=screenwidth, height=screenheight*4/7)
+        self.verticalscrollframe.grid(row=3, rowspan=6,column=0,sticky="w")
         self.verticalscrollframe.grid_rowconfigure((0, 1,2,3,4),weight=1)
+        self.verticalscrollframe._video_select_event = self._video_select_event
         
         self.showscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "TV Shows", VidMod.Shows, fg_color=ColourScheme.Foreground,width=screenwidth)
         self.showscrollframe.grid(row=1,column=0, sticky="nesw")
@@ -364,12 +366,10 @@ class BrowsingPage(StandardPage):
         self.moviescrollframe.grid(row=2,column=0, sticky="nesw")
         
         self.watchhistoryscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch History", VidMod.videos_from_ids(self.master.profile._history), fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.watchhistoryscrollframe.grid(row=3,column=0,sticky="nesw")
         
         self.watchlistscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch List", VidMod.videos_from_ids(self.master.profile._watchlist), fg_color=ColourScheme.Foreground,width=screenwidth)
         self.watchlistscrollframe.grid(row=4,column=0, sticky="nesw")
-        
-        self.temporarybutton = ctk.CTkButton(self,text="go to videopage temporary", command=lambda: self._video_select_event(VidMod.MovieData("315162","Puss in Boots: The Last Wish").load()))
-        self.temporarybutton.place(x=100,y=100)
     
 #starting page    
 class LoginPage(ctk.CTkFrame):
@@ -415,6 +415,7 @@ class LoginPage(ctk.CTkFrame):
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
         server.sendmail(email, receiver_email, email_message)
+        #code = "123456"
 
         def checkUsercode(usercode, code):    
             if usercode == code:
