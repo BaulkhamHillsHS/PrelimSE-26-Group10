@@ -21,6 +21,9 @@ def find_row(filename, fields_to_search: list, data: dict):
     elif filename == "shows.csv":
         f = open("shows.csv", mode="r", newline="")
     
+    elif filename == "episodes.csv":
+        f = open("episodes.csv", mode="r", newline="")
+    
     else:
         print("Invalid file name")
         return False
@@ -148,6 +151,9 @@ def get_all_rows(filename):
     
     elif filename == "shows.csv":
         f = open("shows.csv", mode="r", newline="")
+    
+    elif filename == "episodes.csv":
+        f = open("episodes.csv", mode="r", newline="")
     
     else:
         print("Invalid file name")
