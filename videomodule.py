@@ -1,3 +1,4 @@
+from threading import Thread
 from PIL import Image
 from PIL import UnidentifiedImageError
 import csvmodule as csvMod
@@ -91,6 +92,7 @@ class TVEpisodeData:
                 return Image.open(information)
             except UnidentifiedImageError:
                 print("path", path, "could not be found")
+            return self
 
 class TVShowData(VideoData):
     def __init__(self, *args, **kwargs):
@@ -103,6 +105,7 @@ class TVShowData(VideoData):
             self.loadEpisodes()
     
     def loadEpisodes(self):
+
         prevFound = True
         row = None
         season = 0
@@ -123,6 +126,14 @@ class TVShowData(VideoData):
                 print(self.name, "season", season, "episode", episode, "found")
                 self.episodes.append(TVEpisodeData(**row))
                 prevFound = True
+                threads = []
+                
+        for episode in self.episodes:
+            threads.append(Thread(target=episode.loadImage))
+            threads[-1].start()
+            
+        for thread in threads:
+            thread.join()
         return self
             
     
@@ -157,8 +168,16 @@ print("loading movies...")
 
 for row in csvMod.get_all_rows("moviesdb.csv"):
     Movies.append(MovieData(**row))
-    
-print("done loading, took", str(-starttime+time()), "seconds")
+
+threads = []
+for movie in Movies:
+    threads.append(Thread(target=movie.loadImages))
+    threads[-1].start()
+
+for thread in threads:
+    thread.join()
+
+print("done loading movies, took", str(-starttime+time()), "seconds")
 
 #load in all shows into a list
 starttime = time()
@@ -166,5 +185,13 @@ print("loading shows...")
 
 for row in csvMod.get_all_rows("shows.csv"):
     Shows.append(TVShowData(**row).loadEpisodes())
+    
+threads = []
+for movie in Movies:
+    threads.append(Thread(target=movie.loadImages))
+    threads[-1].start()
+
+for thread in threads:
+    thread.join()
         
-print("done loading, took", str(-starttime+time()), "seconds")
+print("done loading shows, took", str(-starttime+time()), "seconds")
