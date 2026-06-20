@@ -113,7 +113,7 @@ print("done loading, took", str(-starttime+time()), "seconds")
 #load in all shows into a list
 starttime = time()
 print("loading shows...")
-for row in csvMod.get_all_rows(""):
+for row in csvMod.get_all_rows("shows.csv"):
     Shows.append(TVShowData(**row))
         
 print("done loading, took", str(-starttime+time()), "seconds")
