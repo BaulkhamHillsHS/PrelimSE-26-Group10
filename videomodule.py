@@ -45,7 +45,7 @@ class MovieData(VideoData):
     def loadImage(self, path):
         ImageURL = "https://image.tmdb.org/t/p/w500" + path
         response = requests.get(ImageURL)
-        information = BytesIO(response)
+        information = BytesIO(response.content)
         return Image.open(information)
     
     def load(self):
