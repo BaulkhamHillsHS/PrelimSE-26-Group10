@@ -72,4 +72,7 @@ class TVShowData(VideoData):
 #Creating movie list to import into main.py
 Movies = []
 for row in csvMod.get_all_rows("moviesdb.csv"):
-    Movies.append(MovieData(row["id"], row["title"]))
+    Movies.append(MovieData(row["id"], row["title"]).load())
+    
+def filter_movies():
+    pass
