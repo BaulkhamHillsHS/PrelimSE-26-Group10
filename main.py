@@ -28,21 +28,22 @@ class ColourScheme: # for colours that won't change throughout whole app
 
 # widgets
 class VideoWidget(ctk.CTkFrame):
-    def __init__(self, data, width=40, height=80, *args, **kwargs):
-        super().__init__(width=width,height=height, *args, **kwargs)
+    def __init__(self, master, data, width=40, height=80, *args, **kwargs):
+        super().__init__(master, *args, width=width,height=height, **kwargs)
         self.data : VidMod.VideoData = data
+        self._build_ui(width, height)
     
     def _video_select(self):
         self.master._video_select_event(self.data)
     
-    def _build_ui(self):
+    def _build_ui(self, width, height):
         self.grid_columnconfigure((0), weight=1)
         self.grid_rowconfigure((0,1,2,3,4,5,6), weight=1)
         
-        self.namelabel = ctk.CTkLabel(self, text=self.data.name,font=FontStyle.Text,text_color=ColourScheme.Text)
+        self.namelabel = ctk.CTkLabel(self, text=self.data.name,font=FontStyle.Text,text_color=ColourScheme.Text,fg_color=ColourScheme.Background)
         self.namelabel.grid(column=0,row=0,sticky="nesw")
         
-        self.selectbutton = ctk.CTkButton(self, text="",image=ctk.CTkImage(self.data.backdropimage, self.data.backdropimage),command = lambda x: self._video_select())
+        self.selectbutton = ctk.CTkButton(self, text="",image=ctk.CTkImage(self.data.backdropimage, self.data.backdropimage,size=(width, int(height * 5/7))),command = lambda: self._video_select(),fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover)
         self.selectbutton.grid(column=0,row=1,rowspan=5,sticky="nesw")
         
         info = self.data.age_rating
@@ -53,7 +54,7 @@ class VideoWidget(ctk.CTkFrame):
         for genre in self.data.genres:
             info += genre
             
-        self.infolabel = ctk.CTkLabel(self, text=info,font=FontStyle.Text,text_color=ColourScheme.Text)
+        self.infolabel = ctk.CTkLabel(self, text=info,font=FontStyle.Text,text_color=ColourScheme.Text,fg_color=ColourScheme.Background)
         self.infolabel.grid(column=0,row=6,sticky="nesw")
         
 class ProfileWidget(ctk.CTkFrame):
@@ -279,12 +280,16 @@ class VideoPage(StandardPage):
     """
     Screen to display when selecting a movie/show
     """
-    def __init__(self, videodata, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, master, videodata, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
         self.videodata = videodata
+        self._build_ui()
     
     def _build_ui(self):
-        pass
+        self.grid_columnconfigure((0),weight=1)
+        self.grid_rowconfigure((0),weight=1)
+        self.videoimage = VideoWidget(self, self.videodata, width=700,height=500)
+        self.videoimage.grid(row=0, column=0)
     
     def insertVideo(self):
         #practice import of an image       
@@ -299,7 +304,7 @@ class BrowsingPage(StandardPage):
         self.master._change_page("VideoPage", videodata)
     
     def _build_ui(self):
-        self.temporarybutton = ctk.CTkButton(self,text="go to videopage temporary", command=lambda: self._video_select_event(VidMod.MovieData("315162","Puss in Boots: The Last Wish")))
+        self.temporarybutton = ctk.CTkButton(self,text="go to videopage temporary", command=lambda: self._video_select_event(VidMod.MovieData("315162","Puss in Boots: The Last Wish").load()))
         self.temporarybutton.place(x=100,y=100)
     
 #starting page    
@@ -457,7 +462,7 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         
 class ProfilePage(ctk.CTkFrame):
     def __init__(self, *args, **kwargs):
-        super().__init__(fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, *args, **kwargs)
+        super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self.profilesframe = None
         self._build_ui()
         self.edit_profile = False
