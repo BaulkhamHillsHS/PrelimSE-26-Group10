@@ -5,7 +5,7 @@ import csvmodule as csvMod
 import requests
 from io import BytesIO
 
-genres = {
+videogenres = {
     "28" : "Action" ,
     "12" : "Adventure" ,
     "16" : "Animation" ,
@@ -42,7 +42,7 @@ class VideoData:
     Base class for tv shows and movies
     """
     AgeRatings = {"G": 0,"PG": 0,"M" : 12,"MA15+": 15,"R": 18}
-    def __init__(self, id, title, backdrop_path="", age_rating="", genre_ids="", **kwargs):
+    def __init__(self, id, title, backdrop_path="", age_rating="", genre_ids="", genres="", **kwargs):
         self.id = id
         self.name = title
         self.backdroppath = backdrop_path
@@ -50,9 +50,11 @@ class VideoData:
         self.age_rating = age_rating
         self.genres = []
         genre_ids = genre_ids.replace("]", "").replace("[", "").split(", ")
+        genres = genres.split("/")
         for genre_id in genre_ids:
-            if genres.get(genre_id):
-                self.genres.append(genres.get(genre_id))
+            if videogenres.get(genre_id):
+                self.genres.append(videogenres.get(genre_id))
+        self.genres += genres
         self.loaded = (id and title and backdrop_path and age_rating and genre_ids) or False
     
     def loadGenres(self): #convert numbers to genres
@@ -232,6 +234,7 @@ for row in csvMod.get_all_rows("shows.csv"):
     
 threads = []
 for show in Shows:
+    print(show.genres)
     threads.append(Thread(target=show.loadImages))
     threads[-1].start()
 
