@@ -153,8 +153,8 @@ class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
         self._build_ui()
     
     def _create_profile(self):
-        ageentry = self.ageentry.get()
-        nameentry = self.nameentry.get()
+        ageentry = self.ageentry.get().strip()
+        nameentry = self.nameentry.get().strip()
         error = ""
         
         if nameentry:
