@@ -301,14 +301,17 @@ class StandardPage(ctk.CTkFrame):
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
-        self.logo = ctk.CTkLabel(self, text="",image=ctk.CTkImage(logo,logo,size=(100,100)))
-        self.logo.grid(row=0, column=1, padx=10, pady=10, sticky="nw")
+        self.headerframe = ctk.CTkFrame(self,fg_color=ColourScheme.Foreground)
+        self.headerframe.grid(row=0,column=0,sticky="nesw")
+        
+        self.logo = ctk.CTkLabel(self.headerframe, text="",image=ctk.CTkImage(logo,logo,size=(100,100)))
+        self.logo.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
         
         def goMenuPage():
             app._change_page("MenuPage")
     
-        self.menu_button = ctk.CTkButton(self, text="Menu",bg_color=ColourScheme.Button, command=goMenuPage)
-        self.menu_button.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
+        self.menu_button = ctk.CTkButton(self.headerframe, text="Menu",bg_color=ColourScheme.Button, command=goMenuPage)
+        self.menu_button.grid(row=0, column=0, padx=10, pady=10, sticky="ne")
         ##MAYBE CHANGE TO APP INSTEAD OF SELF SO IT APPEARS EVERYWHERE???
         # you only want it for pages which inherit from standardpage though
         # otherwise it'd appear in login and profile page and subscription management page
@@ -421,8 +424,8 @@ class LoginPage(ctk.CTkFrame):
         
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
-        #server.sendmail(email, receiver_email, email_message)
-        code = "123456"
+        server.sendmail(email, receiver_email, email_message)
+        #code = "123456"
 
         def checkUsercode(usercode, code):    
             if usercode == code:
