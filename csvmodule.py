@@ -95,7 +95,7 @@ def edit_row(filename:str, fields_to_search: list[str], data: dict, newdata: dic
         fieldnames = ["accountemail", "profilename", "age", "watchhistory", "watchlist"]
     elif filename == "accounts.csv":
         writef = open("accounts.csv", mode="w", newline="")
-        fieldnames = ["accountname", "email", "password", "plan", "profiles"]
+        fieldnames = ["accountname", "email", "password", "plan", "paymentinfo", "profiles"]
     
     writer = csv.DictWriter(writef, fieldnames)
     writer.writeheader()
@@ -133,7 +133,7 @@ def delete_row(filename:str, fields_to_search: list[str], data: dict):
     
     if filename == "profiles.csv":
         writef = open("profiles.csv", mode="w", newline="")
-        fieldnames = ["accountemail", "profilename", "age", "watchhistory", "watchlist"]
+        fieldnames = ["accountemail", "profilename", "age", "watchhistory", "paymentinfo", "watchlist"]
     elif filename == "accounts.csv":
         writef = open("accounts.csv", mode="w", newline="")
         fieldnames = ["accountname", "email", "password", "plan", "profiles"]
@@ -154,7 +154,7 @@ def append_row(filename:str, data: dict):
         fieldnames = ["accountemail", "profilename", "age", "watchhistory", "watchlist"]
     elif filename == "accounts.csv":
         f = open("accounts.csv", mode="a", newline="")
-        fieldnames = ["accountname", "email", "password", "plan", "profiles"]
+        fieldnames = ["accountname", "email", "password", "plan", "paymentinfo", "profiles"]
     else:
         print("Invalid file name")
         return False
