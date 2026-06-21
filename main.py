@@ -460,6 +460,8 @@ class BrowsingPage(StandardPage):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.get_allowed_videos()
+        self.filters = []
+        self.filterwidgets = {}
         self._build_ui()
     
     def get_allowed_videos(self):
@@ -474,10 +476,41 @@ class BrowsingPage(StandardPage):
         self.watchlist = VidMod.filter_videos(VidMod.videos_from_ids(self.master.profile._watchlist), VidMod.videogenres.values(), self.allowedratings)
     
     def apply_filters(self):
-        pass
+        screenwidth = self.master.winfo_screenwidth()
+        screenheight = self.master.winfo_screenheight()
+        self.frameinscrollframe.destroy()
+        
+        self.frameinscrollframe = ctk.CTkFrame(self.verticalscrollframe, fg_color=ColourScheme.Background)
+        self.frameinscrollframe.grid(row=0,column=0,sticky="nesw")
+        self.frameinscrollframe._video_select_event = self._video_select_event
+        
+        self.showscrollframe = VideoScrollFrameWidget(self.frameinscrollframe, "TV Shows", VidMod.filter_videos(self.shows, self.filters, self.allowedratings), fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.showscrollframe.grid(row=1,column=0, sticky="nesw")
+        self.moviescrollframe = VideoScrollFrameWidget(self.frameinscrollframe, "Movies", VidMod.filter_videos(self.movies, self.filters, self.allowedratings), fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.moviescrollframe.grid(row=2,column=0, sticky="nesw")
+        
+        self.watchhistoryscrollframe = VideoScrollFrameWidget(self.frameinscrollframe, "Watch History", VidMod.filter_videos(self.watchhistory, self.filters, self.allowedratings), fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.watchhistoryscrollframe.grid(row=3,column=0,sticky="nesw")
+        
+        self.watchlistscrollframe = VideoScrollFrameWidget(self.frameinscrollframe, "Watch List", VidMod.filter_videos(self.watchlist, self.filters, self.allowedratings), fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.watchlistscrollframe.grid(row=4,column=0, sticky="nesw")
     
     def add_filter(self):
-        pass
+        addedfilter = self.filterbox.get()
+        if addedfilter:
+            if addedfilter not in self.filters:
+                self.filters.append(addedfilter)
+                filterwidget = ctk.CTkButton(self.filterframe,text="X " + addedfilter, text_color=ColourScheme.Text, fg_color=ColourScheme.Button,hover_color=ColourScheme.Red,command=lambda: self.remove_filter(addedfilter))
+                filterwidget.grid(column=len(self.filterwidgets),row=0)
+                self.filterwidgets[addedfilter] = filterwidget
+            else:
+                messagebox.showwarning('Filter has not been applied', 'Filter already applied')
+    
+    def remove_filter(self, filter_to_remove):
+        self.filters.remove(filter_to_remove)
+        if self.filterwidgets.get(filter_to_remove):
+            self.filterwidgets[filter_to_remove].destroy()
+            self.filterwidgets.pop(filter_to_remove)
     
     def _video_select_event(self, videodata):
         if "show" in type(videodata).__name__.lower():
@@ -491,21 +524,38 @@ class BrowsingPage(StandardPage):
         self.grid_columnconfigure((0), weight=1)
         self.grid_rowconfigure((0,1,2,3,4,5,6,7,8), weight=1)
         
+        self.filterbox = ctk.CTkComboBox(self, fg_color=ColourScheme.Foreground)
+        self.filterbox.configure(values=list(VidMod.videogenres.values()))
+        self.filterbox.grid(row=1,column=0,sticky="w")
+        
+        self.addfilterbutton = ctk.CTkButton(self, text="Add Filter", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.add_filter)
+        self.addfilterbutton.grid(row=1,column=0)
+        
+        self.applyfilterbutton = ctk.CTkButton(self, text="Apply Filters", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.apply_filters)
+        self.applyfilterbutton.grid(row=1,column=0,sticky="e")
+        
+        self.filterframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Foreground,width=screenwidth,height=20,orientation="horizontal")
+        self.filterframe.grid(row=2,column=0)
+        
         self.verticalscrollframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Background,width=screenwidth, height=screenheight*4/7)
         self.verticalscrollframe.grid(row=3, rowspan=6,column=0,sticky="w")
         self.verticalscrollframe.grid_rowconfigure((0, 1,2,3,4),weight=1)
         self.verticalscrollframe._video_select_event = self._video_select_event
         
-        self.showscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "TV Shows", VidMod.Shows, fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.frameinscrollframe = ctk.CTkFrame(self.verticalscrollframe, fg_color=ColourScheme.Background)
+        self.frameinscrollframe.grid(row=0,column=0,sticky="nesw")
+        self.frameinscrollframe._video_select_event = self._video_select_event
+        
+        self.showscrollframe = VideoScrollFrameWidget(self.frameinscrollframe, "TV Shows", self.shows, fg_color=ColourScheme.Foreground,width=screenwidth)
         self.showscrollframe.grid(row=1,column=0, sticky="nesw")
         
-        self.moviescrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Movies", VidMod.Movies, fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.moviescrollframe = VideoScrollFrameWidget(self.frameinscrollframe, "Movies", self.movies, fg_color=ColourScheme.Foreground,width=screenwidth)
         self.moviescrollframe.grid(row=2,column=0, sticky="nesw")
         
-        self.watchhistoryscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch History", VidMod.videos_from_ids(self.master.profile._history), fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.watchhistoryscrollframe = VideoScrollFrameWidget(self.frameinscrollframe, "Watch History", self.watchhistory, fg_color=ColourScheme.Foreground,width=screenwidth)
         self.watchhistoryscrollframe.grid(row=3,column=0,sticky="nesw")
         
-        self.watchlistscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch List", VidMod.videos_from_ids(self.master.profile._watchlist), fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.watchlistscrollframe = VideoScrollFrameWidget(self.frameinscrollframe, "Watch List", self.watchlist, fg_color=ColourScheme.Foreground,width=screenwidth)
         self.watchlistscrollframe.grid(row=4,column=0, sticky="nesw")
     
 #starting page    
@@ -530,6 +580,9 @@ class LoginPage(ctk.CTkFrame):
         self.grid_rowconfigure((0, 1, 2, 3), weight=1)
         
         #build page elements
+        self.logo = ctk.CTkLabel(self, text="",image=ctk.CTkImage(Image.open("Images/appname_ss_logo.png"),size=(100,100)))
+        self.logo.grid(row=0, column=0, padx=10, pady=10, sticky="n")
+        
         self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
         self.label.grid(row=0, column=1, padx=10, pady=15, sticky="ew")
             
@@ -568,7 +621,7 @@ class LoginPage(ctk.CTkFrame):
         #uses  account modules login function to check if account exists
         userAccount = AccMod.login(email, password)
         if userAccount != False:
-            messagebox.showwarning('Login Sucessful', 'You have sucessfully logged in!')
+            messagebox.showwarning('Login Successful', 'You have sucessfully logged in!')
             self._2FactAuth(userAccount, email)                        
         elif not email or not password: 
             messagebox.showwarning('Details Missing', 'Please enter both email and password')
@@ -584,7 +637,7 @@ class LoginPage(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, text="AppName Streaming Service", text_color=ColourScheme.Text, font=("arial", 40))
         self.label.grid(row=0, column=1, padx=20, pady=30, sticky="ew")
         
-        self.logo = ctk.CTkLabel(self, text="",image=ctk.CTkImage(logo,logo,size=(100,100)))
+        self.logo = ctk.CTkLabel(self, text="",image=ctk.CTkImage(logo, logo,size=(100,100)))
         self.logo.grid(row=0, column=1, padx=10, pady=10, sticky="w")
                 
         self.email_entry = ctk.CTkEntry(self, placeholder_text="Enter your email", height=30)
@@ -674,6 +727,8 @@ class MenuPage(ctk.CTkFrame):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
     def _build_ui(self):
+        self.logo = ctk.CTkLabel(self, text="",image=ctk.CTkImage(Image.open("Images/appname_ss_logo.png"),size=(100,100)))
+        self.logo.grid(row=0, column=1, padx=10, pady=10, sticky="n")
         account : AccMod.Account = self.master.account
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
@@ -773,9 +828,13 @@ class ProfilePage(ctk.CTkFrame):
         self.profilesframe.grid(column=1,row=2, columnspan=2)
     
     def _build_ui(self):
+        
         self.grid_columnconfigure((0,1,2,3), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         self._build_profilesframe()
+        
+        self.logo = ctk.CTkLabel(self, text="",image=ctk.CTkImage(Image.open("Images/appname_ss_logo.png"),size=(100,100)))
+        self.logo.grid(row=0, column=0, padx=10, pady=10, sticky="n")
         
         self.label = ctk.CTkLabel(self, text="Profile Page", text_color=ColourScheme.Text, font=FontStyle.Title)
         self.label.grid(row=0, column=1, columnspan=2, padx=20, pady=30, sticky="ew")
