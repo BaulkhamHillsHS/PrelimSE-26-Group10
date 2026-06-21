@@ -539,8 +539,18 @@ class MenuPage(ctk.CTkFrame):
         self.browse_button.grid(row=1, column=1, padx=20, pady=5, sticky="ew")
         
         def view_report():
-            #enter watchlist code
-            pass
+            account : AccMod.Account = self.master.account
+            profiles: list[AccMod.Profile] = AccMod.returnProfiles(account)
+            view_log = ""
+            for profile in profiles:
+                view_log = view_log + profile._profilename + " - Shows watched: "
+                for show in profile._history:
+                    view_log = view_log + "\n" + show
+                view_log = view_log + "\n"
+            fh = open('acc_viewing_report.txt', 'w')
+            fh.write(view_log)
+            fh.close()
+
             
         self.watchlist_button = ctk.CTkButton(self, text="Download Viewing Report", command=view_report)
         self.watchlist_button.grid(row=2, column=1, padx=20, pady=5, sticky="ew")
