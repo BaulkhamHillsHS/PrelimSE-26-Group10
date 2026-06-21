@@ -200,7 +200,6 @@ def videos_from_ids(ids):
     
     # retain the ordering of the ids parameter
     for video in found:
-        print(video.name)
         if "Movie" in type(video).__name__:
             reorderedfound[ids.index(video.id)] = video
         elif "Show" in type(video).__name__:

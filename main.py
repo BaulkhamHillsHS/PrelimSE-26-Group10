@@ -294,9 +294,9 @@ class StandardPage(ctk.CTkFrame):
     """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master, *args, fg_color=ColourScheme.Background, **kwargs)
-        self._build_ui()
+        self._build_header()
     
-    def _build_ui(self): #method to be overriden
+    def _build_header(self):
         logo = Image.open("Images/appname_ss_logo.png")
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
@@ -310,6 +310,11 @@ class StandardPage(ctk.CTkFrame):
         self.menu_button = ctk.CTkButton(self, text="Menu",bg_color=ColourScheme.Button, command=goMenuPage)
         self.menu_button.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
         ##MAYBE CHANGE TO APP INSTEAD OF SELF SO IT APPEARS EVERYWHERE???
+        # you only want it for pages which inherit from standardpage though
+        # otherwise it'd appear in login and profile page and subscription management page
+    
+    def _build_ui(self): #method to be overwritten (DON'T TOUCH THIS)
+        pass
         
 
 #pages after picking a profile
@@ -318,6 +323,8 @@ class VideoPage(StandardPage):
     Screen to display when selecting a movie/show
     """
     def __init__(self, master, videodata, *args, **kwargs):
+        print(videodata)
+        print(videodata.__dict__)
         super().__init__(master, *args, **kwargs)
         self.videodata = videodata
         self._build_ui()
@@ -414,8 +421,8 @@ class LoginPage(ctk.CTkFrame):
         
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
-        server.sendmail(email, receiver_email, email_message)
-        #code = "123456"
+        #server.sendmail(email, receiver_email, email_message)
+        code = "123456"
 
         def checkUsercode(usercode, code):    
             if usercode == code:
