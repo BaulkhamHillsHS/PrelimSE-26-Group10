@@ -26,7 +26,13 @@ class ColourScheme: # for colours that won't change throughout whole app
     ButtonHover = "#844A04"
 
 # widgets
-class VideoWidget(ctk.CTkFrame):
+class BrowsingVideoWidget(ctk.CTkFrame):
+    '''
+    Widget that displays a movie with a button to select it
+    When the button is clicked, it fires a _video_select_event function
+    (make sure the parent has a function called _video_select_event)
+    '''
+    
     def __init__(self, master, data, width=300, height=200, *args, **kwargs):
         super().__init__(master, *args, width=width,height=height, **kwargs)
         self.data = data
@@ -53,11 +59,15 @@ class VideoWidget(ctk.CTkFrame):
         self.infolabel.grid(column=0,row=6,sticky="nesw")
 
 class VideoScrollFrameWidget(ctk.CTkFrame):
+    '''
+    A horizontally scrolling frame which holds browsingvideowidgets
+    '''
+    
     def __init__(self, master, title: str, videos: list[VidMod.VideoData], *args, width=2000, **kwargs):
         super().__init__(master, *args, width=width, **kwargs)
-        self.width = width
-        self.title = title
-        self.videos = videos
+        self.width :int = width
+        self.title :str = title
+        self.videos :list[VidMod.VideoData]= videos
         self._build_ui()
     
     def _video_select_event(self, data):
@@ -77,15 +87,20 @@ class VideoScrollFrameWidget(ctk.CTkFrame):
         if self.videos:
             i = 0
             for video in self.videos:
-                video = VideoWidget(self.scrollableframe,video.load())
+                video = BrowsingVideoWidget(self.scrollableframe,video.load())
                 video.grid(row=0,column=i)
                 i+=1
         
 class ProfileWidget(ctk.CTkFrame):
+    '''
+    A widget which has a button to select a profile
+    when the button is clicked it fires _profile_button_pressed on a ProfilePage
+    '''
+    
     profileimage = Image.open("Images/userimage.png")
     def __init__(self, master, name, *args, **kwargs):
         super().__init__(master, *args, fg_color=ColourScheme.Foreground, bg_color=ColourScheme.Foreground, **kwargs)
-        self.name = name
+        self.name :str = name
         self._build_ui()
     
     def _button_click(self, widget, name):
@@ -119,9 +134,13 @@ class ProfileWidget(ctk.CTkFrame):
         self.profilebutton.configure(bg_color=profile_colour)
         self.profilebutton.grid(column=0,row=0)
 
-# ctktoplevels? what do i even call this
+
 blacklistednamechars = "/,"
 class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
+    '''
+    Create a new profile
+    '''
+    
     def __init__(self, profilepage, account, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("400x400")
@@ -198,18 +217,26 @@ class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
         self.savebutton.grid(row=3,column=0,columnspan=2)
 
 class ProfileEditor(ctk.CTkToplevel):
-    def __init__(self, profilepage, account, profilename, *args, **kwargs):
+    '''
+    Profile editor
+    '''
+    
+    def __init__(self, profilepage, account, profile, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("400x400")
         self._fg_color = ColourScheme.Background
         self.focus()
+        profilename = profile._profilename
         self.title(profilename + "'s Settings")
         
         self.profilepage: ProfilePage = profilepage
         self.account: AccMod.Account = account
-        self.profilename = profilename
-        self.profile = AccMod.Profile(self.account, self.profilename)
-        self.profile.load_from_csv()
+        self.profilename : str = profilename
+        self.profile : AccMod.Profile = profile
+        
+        self.profile_is_new = True
+        if self.profile.load_from_csv(): # new profiles cannot be read from csv
+            self.profile_is_new = False
         self._build_ui()
     
     def _save_changes(self):
@@ -249,12 +276,20 @@ class ProfileEditor(ctk.CTkToplevel):
             self.errorlabel.configure(text=error)
         else:
             if messagebox.askyesno("Edit Profile", f"Do you want to edit profile {self.profilename}?"):
-                if nameentry != "" and ageentry != "":
-                    self.profile.update_details(nameentry, ageentry)
-                elif nameentry != "":
-                    self.profile.update_details(nameentry, self.profile._age)
-                elif ageentry!= " ":
-                    self.profile.update_details(self.profilename, ageentry)
+                if self.profile_is_new:
+                    if nameentry != "" and ageentry != "":
+                        self.profile.update_details(nameentry, ageentry)
+                    elif nameentry != "":
+                        self.profile.update_details(nameentry, self.profile._age)
+                    elif ageentry!= "":
+                        self.profile.update_details(self.profilename, ageentry)
+                else:
+                    if nameentry != "" and ageentry != "":
+                        self.profile.update_details(nameentry, ageentry, True)
+                    elif nameentry != "":
+                        self.profile.update_details(nameentry, self.profile._age, True)
+                    elif ageentry!= "":
+                        self.profile.update_details(self.profilename, ageentry, True)
                 
                 self.profilepage._build_profilesframe()
                 self.destroy()
@@ -294,22 +329,28 @@ class StandardPage(ctk.CTkFrame):
     """
     def __init__(self, master, *args, **kwargs):
         super().__init__(master, *args, fg_color=ColourScheme.Background, **kwargs)
-        self._build_ui()
+        self._build_header()
     
-    def _build_ui(self): #method to be overriden
+    def _build_header(self):
         logo = Image.open("Images/appname_ss_logo.png")
         self.grid_columnconfigure((0,1,2), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
-        self.logo = ctk.CTkLabel(self, text="",image=ctk.CTkImage(logo,logo,size=(100,100)))
-        self.logo.grid(row=0, column=1, padx=10, pady=10, sticky="nw")
+        self.headerframe = ctk.CTkFrame(self,fg_color=ColourScheme.Foreground)
+        self.headerframe.grid(row=0,column=0,columnspan=100,sticky="nesw")
+        
+        self.logo = ctk.CTkLabel(self.headerframe, text="",image=ctk.CTkImage(logo,logo,size=(100,100)))
+        self.logo.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
         
         def goMenuPage():
             app._change_page("MenuPage")
     
-        self.menu_button = ctk.CTkButton(self, text="Menu",bg_color=ColourScheme.Button, command=goMenuPage)
+        self.menu_button = ctk.CTkButton(self.headerframe, text="Menu",fg_color=ColourScheme.Button,bg_color=ColourScheme.Foreground,hover_color=ColourScheme.ButtonHover, command=goMenuPage)
         self.menu_button.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
-        ##MAYBE CHANGE TO APP INSTEAD OF SELF SO IT APPEARS EVERYWHERE???
+        
+    
+    def _build_ui(self): #method to be overwritten (DON'T TOUCH THIS)
+        pass
         
 
 #pages after picking a profile
@@ -319,24 +360,37 @@ class VideoPage(StandardPage):
     """
     def __init__(self, master, videodata, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
-        self.videodata = videodata
+        self.videodata : VidMod.VideoData = videodata
         self._build_ui()
     
     def _build_ui(self):
         self.grid_columnconfigure((0),weight=1)
         self.grid_rowconfigure((0),weight=1)
-        #don't use the videowidget class for this page i was just testing
-        self.videoimage = VideoWidget(self, self.videodata, width=700,height=500)
-        self.videoimage.grid(row=0, column=0)
-    
-    def insertVideo(self):
-        #practice import of an image       
-        pass
+
         
 class BrowsingPage(StandardPage):
+    '''
+    Page to browse through videos
+    '''
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.get_allowed_videos()
         self._build_ui()
+    
+    def get_allowed_videos(self):
+        self.allowedratings : list[str] = list(VidMod.VideoData.AgeRatings.keys())
+        for rating in VidMod.VideoData.AgeRatings:
+            if VidMod.VideoData.AgeRatings[rating] > int(self.master.profile._age):
+                self.allowedratings.remove(rating)
+        
+        self.shows = VidMod.filter_videos(VidMod.Shows, VidMod.videogenres.values(), self.allowedratings)
+        self.movies = VidMod.filter_videos(VidMod.Movies, VidMod.videogenres.values(), self.allowedratings)
+        self.watchhistory = VidMod.filter_videos(VidMod.videos_from_ids(self.master.profile._history), VidMod.videogenres.values(), self.allowedratings)
+        self.watchlist = VidMod.filter_videos(VidMod.videos_from_ids(self.master.profile._watchlist), VidMod.videogenres.values(), self.allowedratings)
+    
+    def apply_filters(self):
+        pass
     
     def _video_select_event(self, videodata):
         if videodata.id not in self.master.profile._history:
@@ -353,9 +407,11 @@ class BrowsingPage(StandardPage):
         screenheight = self.master.winfo_screenheight()
         self.grid_columnconfigure((0), weight=1)
         self.grid_rowconfigure((0,1,2,3,4,5,6,7,8), weight=1)
-        self.verticalscrollframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Background,width=screenwidth, height=screenheight*5/7)
-        self.verticalscrollframe.grid(row=1, rowspan=7,column=0,sticky="w")
+        
+        self.verticalscrollframe = ctk.CTkScrollableFrame(self, fg_color=ColourScheme.Background,width=screenwidth, height=screenheight*4/7)
+        self.verticalscrollframe.grid(row=3, rowspan=6,column=0,sticky="w")
         self.verticalscrollframe.grid_rowconfigure((0, 1,2,3,4),weight=1)
+        self.verticalscrollframe._video_select_event = self._video_select_event
         
         self.showscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "TV Shows", VidMod.Shows, fg_color=ColourScheme.Foreground,width=screenwidth)
         self.showscrollframe.grid(row=1,column=0, sticky="nesw")
@@ -364,15 +420,16 @@ class BrowsingPage(StandardPage):
         self.moviescrollframe.grid(row=2,column=0, sticky="nesw")
         
         self.watchhistoryscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch History", VidMod.videos_from_ids(self.master.profile._history), fg_color=ColourScheme.Foreground,width=screenwidth)
+        self.watchhistoryscrollframe.grid(row=3,column=0,sticky="nesw")
         
         self.watchlistscrollframe = VideoScrollFrameWidget(self.verticalscrollframe, "Watch List", VidMod.videos_from_ids(self.master.profile._watchlist), fg_color=ColourScheme.Foreground,width=screenwidth)
         self.watchlistscrollframe.grid(row=4,column=0, sticky="nesw")
-        
-        self.temporarybutton = ctk.CTkButton(self,text="go to videopage temporary", command=lambda: self._video_select_event(VidMod.MovieData("315162","Puss in Boots: The Last Wish").load()))
-        self.temporarybutton.place(x=100,y=100)
     
 #starting page    
 class LoginPage(ctk.CTkFrame):
+    '''
+    Page to login to an account
+    '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
@@ -415,6 +472,7 @@ class LoginPage(ctk.CTkFrame):
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
         server.sendmail(email, receiver_email, email_message)
+        #code = "123456"
 
         def checkUsercode(usercode, code):    
             if usercode == code:
@@ -458,6 +516,10 @@ class LoginPage(ctk.CTkFrame):
 #page after logging into an account
 # I need to fix it as it doesnt immeditatley load the updataed plan + it needs to print a TXT recpiet file
 class SubscriptionManagementPage(ctk.CTkFrame):
+    '''
+    Page to edit account subscription
+    '''
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
@@ -521,6 +583,10 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         ## txt file showing supscription invoice after change of plan
         
 class MenuPage(ctk.CTkFrame):
+    '''
+    Homepage for a profile
+    '''
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
@@ -571,21 +637,35 @@ class MenuPage(ctk.CTkFrame):
         
         
 class ProfilePage(ctk.CTkFrame):
+    '''
+    Page for selecting a profile
+    '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
+        self.account : AccMod.Account = self.master.account
         self.profilesframe = None
         self._build_ui()
         self.edit_profile = False
     
-    def _profile_button_pressed(self, profilename):
+    def _profile_button_pressed(self, profilename:str):
+        '''
+        Function that fires when a profile button is pressed
+        '''
+        
         if self.edit_profile:
             # enter the profile editor
-            editor = ProfileEditor(self, self.master.account, profilename)
+            editedprofile = None
+            for profile in self.master.account._profiles:
+                if profile._profilename == profilename:
+                    editedprofile = profile
+            ProfileEditor(self, self.master.account, editedprofile)
         else:
             # enters menu page with the profile
-            self.master.profile = AccMod.Profile(self.master.account, profilename)
-            if self.master.profile.load_from_csv():
-                self.master._change_page("MenuPage")
+            for profile in self.master.account._profiles:
+                if profile._profilename == profilename:
+                    self.master.profile = profile
+                    break
+            self.master._change_page("MenuPage")
     
     def _build_profilesframe(self):
         if self.profilesframe:
@@ -593,8 +673,7 @@ class ProfilePage(ctk.CTkFrame):
             for profilewidget in self.profilesframe.winfo_children():
                 profilewidget.destroy()
         
-        account : AccMod.Account = self.master.account
-        profilenames = account._profilenames
+        profilenames = self.account._profilenames
         lenprofiles = len(profilenames)
         
         self.profilesframe = ctk.CTkFrame(self, fg_color=ColourScheme.Foreground, bg_color=ColourScheme.Foreground)
@@ -648,7 +727,7 @@ class ProfilePage(ctk.CTkFrame):
         self.profilecreator_button.grid(row=5, column=2)
         self.log_out_button.grid(row=5, column=3, padx=20, pady=30, sticky="sw")
         
-# used to map a string to a class idk actually this seems useless
+# used to map a string to a class (useless)
 pages : dict = {"StandardPage": StandardPage, 
                 "ProfilePage": ProfilePage,
                 "VideoPage": VideoPage,
@@ -659,6 +738,10 @@ pages : dict = {"StandardPage": StandardPage,
                 "MenuPage": MenuPage}
 
 class StreamingApp(ctk.CTk):
+    '''
+    App that changes pages and stuff
+    '''
+    
     Title = "App"
     def __init__(self):
         super().__init__()
@@ -671,7 +754,11 @@ class StreamingApp(ctk.CTk):
         self.grid_rowconfigure(0,weight=1)
         self.grid_columnconfigure(0,weight=1)
     
-    def _change_page(self, newpage, *args, **kwargs):
+    def _change_page(self, newpage:str, *args, **kwargs):
+        """
+        Change the app page being viewed
+        """
+        # *args, **kwargs is used in VideoPage, where VidMod.VideoData is passed as an argument
         if pages.get(newpage):
             # undisplay the previous page
             if self.currentpage:
@@ -702,4 +789,12 @@ if __name__ == "__main__":
     app = StreamingApp()
     app._change_page("LoginPage")
     app.mainloop()
+    
+    #run on app close
+    app.account.save_to_csv()
+    for profile in app.account._profiles:
+        if profile.load_from_csv():
+            profile.save_to_csv()
+        else:
+            app.account.create_profile(profile._profilename, profile.age, True)
 

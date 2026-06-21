@@ -2,7 +2,13 @@
 
 import csv
 
-def find_row(filename, fields_to_search: list, data: dict):
+def find_row(filename:str, fields_to_search: list[str], data: dict):
+    """
+    Valid filenames: profiles.csv, accounts.csv, moviesdb.csv, shows.csv, episodes.csv
+    Finds and returns the data of a row in a file\n
+    fields_to_search is the fields you are searching for
+    data is the information for each of those fields used to determine the row
+    """
     for field in fields_to_search:
         if not data.get(field, False): #check if each field exists in data
             print("amount of fields must match amount of data")
@@ -46,7 +52,15 @@ def find_row(filename, fields_to_search: list, data: dict):
         
     return result_row
 
-def edit_row(filename, fields_to_search: list, data: dict, newdata: dict):
+def edit_row(filename:str, fields_to_search: list[str], data: dict, newdata: dict):
+    """
+    Valid filenames: profiles.csv, accounts.csv
+    edit the data of a row in a file\n
+    fields_to_search is the fields you are searching for
+    data is the information for each of those fields used to determine the row
+    newdata is the replacement values 
+    e.g. {key_to_be_replaced : value_to_be_replaced} (does not have to replace all keys)
+    """
     if filename == "profiles.csv":
         readf = open("profiles.csv", mode="r", newline="")
     elif filename == "accounts.csv":
@@ -88,7 +102,13 @@ def edit_row(filename, fields_to_search: list, data: dict, newdata: dict):
     writer.writerows(filedata)
     writef.close()
 
-def delete_row(filename, fields_to_search: list, data: dict):
+def delete_row(filename:str, fields_to_search: list[str], data: dict):
+    """
+    Valid filenames: profiles.csv, accounts.csv
+    Delete a row in a file\n
+    fields_to_search is the fields you are searching for
+    data is the information for each of those fields used to determine the row
+    """
     if filename == "profiles.csv":
         readf = open("profiles.csv", mode="r", newline="")
     elif filename == "accounts.csv":
@@ -123,7 +143,12 @@ def delete_row(filename, fields_to_search: list, data: dict):
     writer.writerows(filedata)
     writef.close()
 
-def append_row(filename, data: dict):
+def append_row(filename:str, data: dict):
+    """
+    Valid filenames: profiles.csv, accounts.csv
+    Add a new row at the end of a file\n
+    data is the information for each of those fields used to determine the row
+    """
     if filename == "profiles.csv":
         f = open("profiles.csv", mode="a", newline="")
         fieldnames = ["accountemail", "profilename", "age", "watchhistory", "watchlist"]
@@ -139,7 +164,11 @@ def append_row(filename, data: dict):
     
     f.close()
 
-def get_all_rows(filename):
+def get_all_rows(filename:str):
+    """
+    Valid filenames: profiles.csv, accounts.csv, moviesdb.csv, shows.csv, episodes.csv
+    Get all rows in a file in a list\n
+    """
     if filename == "profiles.csv":
         f = open("profiles.csv", mode="r", newline="")
             
