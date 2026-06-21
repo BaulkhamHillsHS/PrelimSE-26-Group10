@@ -471,8 +471,8 @@ class LoginPage(ctk.CTkFrame):
         
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
-        #server.sendmail(email, receiver_email, email_message)
-        code = "123456"
+        server.sendmail(email, receiver_email, email_message)
+        #code = "123456"
 
         def checkUsercode(usercode, code):    
             if usercode == code:
