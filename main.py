@@ -26,7 +26,13 @@ class ColourScheme: # for colours that won't change throughout whole app
     ButtonHover = "#844A04"
 
 # widgets
-class VideoWidget(ctk.CTkFrame):
+class BrowsingVideoWidget(ctk.CTkFrame):
+    '''
+    Widget that displays a movie with a button to select it
+    When the button is clicked, it fires a _video_select_event function
+    (make sure the parent has a function called _video_select_event)
+    '''
+    
     def __init__(self, master, data, width=300, height=200, *args, **kwargs):
         super().__init__(master, *args, width=width,height=height, **kwargs)
         self.data = data
@@ -53,6 +59,10 @@ class VideoWidget(ctk.CTkFrame):
         self.infolabel.grid(column=0,row=6,sticky="nesw")
 
 class VideoScrollFrameWidget(ctk.CTkFrame):
+    '''
+    A horizontally scrolling frame which holds browsingvideowidgets
+    '''
+    
     def __init__(self, master, title: str, videos: list[VidMod.VideoData], *args, width=2000, **kwargs):
         super().__init__(master, *args, width=width, **kwargs)
         self.width = width
@@ -77,11 +87,16 @@ class VideoScrollFrameWidget(ctk.CTkFrame):
         if self.videos:
             i = 0
             for video in self.videos:
-                video = VideoWidget(self.scrollableframe,video.load())
+                video = BrowsingVideoWidget(self.scrollableframe,video.load())
                 video.grid(row=0,column=i)
                 i+=1
         
 class ProfileWidget(ctk.CTkFrame):
+    '''
+    A widget which has a button to select a profile
+    when the button is clicked it fires _profile_button_pressed on a ProfilePage
+    '''
+    
     profileimage = Image.open("Images/userimage.png")
     def __init__(self, master, name, *args, **kwargs):
         super().__init__(master, *args, fg_color=ColourScheme.Foreground, bg_color=ColourScheme.Foreground, **kwargs)
@@ -119,9 +134,13 @@ class ProfileWidget(ctk.CTkFrame):
         self.profilebutton.configure(bg_color=profile_colour)
         self.profilebutton.grid(column=0,row=0)
 
-# ctktoplevels? what do i even call this
+
 blacklistednamechars = "/,"
 class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
+    '''
+    Create a new profile
+    '''
+    
     def __init__(self, profilepage, account, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("400x400")
@@ -198,6 +217,10 @@ class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
         self.savebutton.grid(row=3,column=0,columnspan=2)
 
 class ProfileEditor(ctk.CTkToplevel):
+    '''
+    Profile editor
+    '''
+    
     def __init__(self, profilepage, account, profilename, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("400x400")
@@ -302,7 +325,7 @@ class StandardPage(ctk.CTkFrame):
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
         self.headerframe = ctk.CTkFrame(self,fg_color=ColourScheme.Foreground)
-        self.headerframe.grid(row=0,column=0,sticky="nesw")
+        self.headerframe.grid(row=0,column=0,columnspan=100,sticky="nesw")
         
         self.logo = ctk.CTkLabel(self.headerframe, text="",image=ctk.CTkImage(logo,logo,size=(100,100)))
         self.logo.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
@@ -310,11 +333,9 @@ class StandardPage(ctk.CTkFrame):
         def goMenuPage():
             app._change_page("MenuPage")
     
-        self.menu_button = ctk.CTkButton(self.headerframe, text="Menu",bg_color=ColourScheme.Button, command=goMenuPage)
-        self.menu_button.grid(row=0, column=0, padx=10, pady=10, sticky="ne")
-        ##MAYBE CHANGE TO APP INSTEAD OF SELF SO IT APPEARS EVERYWHERE???
-        # you only want it for pages which inherit from standardpage though
-        # otherwise it'd appear in login and profile page and subscription management page
+        self.menu_button = ctk.CTkButton(self.headerframe, text="Menu",fg_color=ColourScheme.Button,bg_color=ColourScheme.Foreground,hover_color=ColourScheme.ButtonHover, command=goMenuPage)
+        self.menu_button.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
+        
     
     def _build_ui(self): #method to be overwritten (DON'T TOUCH THIS)
         pass
@@ -326,8 +347,6 @@ class VideoPage(StandardPage):
     Screen to display when selecting a movie/show
     """
     def __init__(self, master, videodata, *args, **kwargs):
-        print(videodata)
-        print(videodata.__dict__)
         super().__init__(master, *args, **kwargs)
         self.videodata = videodata
         self._build_ui()
@@ -335,15 +354,13 @@ class VideoPage(StandardPage):
     def _build_ui(self):
         self.grid_columnconfigure((0),weight=1)
         self.grid_rowconfigure((0),weight=1)
-        #don't use the videowidget class for this page i was just testing
-        self.videoimage = VideoWidget(self, self.videodata, width=700,height=500)
-        self.videoimage.grid(row=0, column=0)
-    
-    def insertVideo(self):
-        #practice import of an image       
-        pass
+
         
 class BrowsingPage(StandardPage):
+    '''
+    Page to browse through videos
+    '''
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._build_ui()
@@ -383,6 +400,9 @@ class BrowsingPage(StandardPage):
     
 #starting page    
 class LoginPage(ctk.CTkFrame):
+    '''
+    Page to login to an account
+    '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
@@ -424,8 +444,8 @@ class LoginPage(ctk.CTkFrame):
         
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
-        server.sendmail(email, receiver_email, email_message)
-        #code = "123456"
+        #server.sendmail(email, receiver_email, email_message)
+        code = "123456"
 
         def checkUsercode(usercode, code):    
             if usercode == code:
@@ -469,6 +489,10 @@ class LoginPage(ctk.CTkFrame):
 #page after logging into an account
 # I need to fix it as it doesnt immeditatley load the updataed plan + it needs to print a TXT recpiet file
 class SubscriptionManagementPage(ctk.CTkFrame):
+    '''
+    Page to edit account subscription
+    '''
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
@@ -532,6 +556,10 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         ## txt file showing supscription invoice after change of plan
         
 class MenuPage(ctk.CTkFrame):
+    '''
+    Homepage for a profile
+    '''
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self._build_ui()
@@ -572,13 +600,20 @@ class MenuPage(ctk.CTkFrame):
         
         
 class ProfilePage(ctk.CTkFrame):
+    '''
+    Page for selecting a profile
+    '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
         self.profilesframe = None
         self._build_ui()
         self.edit_profile = False
     
-    def _profile_button_pressed(self, profilename):
+    def _profile_button_pressed(self, profilename:str):
+        '''
+        Function that fires when a profile button is pressed
+        '''
+        
         if self.edit_profile:
             # enter the profile editor
             editor = ProfileEditor(self, self.master.account, profilename)
@@ -649,7 +684,7 @@ class ProfilePage(ctk.CTkFrame):
         self.profilecreator_button.grid(row=5, column=2)
         self.log_out_button.grid(row=5, column=3, padx=20, pady=30, sticky="sw")
         
-# used to map a string to a class idk actually this seems useless
+# used to map a string to a class (useless)
 pages : dict = {"StandardPage": StandardPage, 
                 "ProfilePage": ProfilePage,
                 "VideoPage": VideoPage,
@@ -660,6 +695,10 @@ pages : dict = {"StandardPage": StandardPage,
                 "MenuPage": MenuPage}
 
 class StreamingApp(ctk.CTk):
+    '''
+    App that changes pages and stuff
+    '''
+    
     Title = "App"
     def __init__(self):
         super().__init__()
@@ -672,7 +711,11 @@ class StreamingApp(ctk.CTk):
         self.grid_rowconfigure(0,weight=1)
         self.grid_columnconfigure(0,weight=1)
     
-    def _change_page(self, newpage, *args, **kwargs):
+    def _change_page(self, newpage:str, *args, **kwargs):
+        """
+        Change the app page being viewed
+        """
+        # *args, **kwargs is used in VideoPage, where VidMod.VideoData is passed as an argument
         if pages.get(newpage):
             # undisplay the previous page
             if self.currentpage:

@@ -4,30 +4,22 @@
 import csv
 from csvmodule import *
 
-class Theme:
-    """
-    Colour theme of the app
-    """
-    def __init__(self): # 
-        self.Primary = "#34c9c0"
-        self.Secondary = "#dee60e"
-        self.Foreground = "#3c807e"
-        self.Background = "#000000"  
-        self.Text = "#ececec" 
-        self.Button = "#3b7472"
-        self.ButtonHover = "#40a3a0"
-
 class Profile:
-    def __init__(self, account, name):
+    """
+    Class stored inside an Account object with watchhistory and watchlist attributes for a personal feed
+    """
+    def __init__(self, account, name: str):
         self._account: Account = account
         self._profilename = name
         self._age = 0
         self._history: list = []
         self._watchlist: list = []
-        self._theme = Theme()
         self.load_from_csv()
 
-    def update_details(self, newname, newage):
+    def update_details(self, newname: str, newage: str):
+        """
+        Update the name and age of a profile in profiles.csv and its name in accounts.csv
+        """
         newname = newname.strip()
         if int(newage) <= 0:
             return "Age too young"
@@ -38,12 +30,17 @@ class Profile:
                  ["accountemail", "profilename"], 
                  {"accountemail" : self._account._email, "profilename": self._profilename}, 
                  {"profilename": newname, "age": newage})
+        
+        # update profile name in account
         self._account._profilenames[self._account._profilenames.index(self._profilename)] = newname
         self._account.save_to_csv()
         self._profilename = newname
         self._age = newage
     
     def save_to_csv(self):
+        """
+        Save watchlist and watchhistory to profiles.csv
+        """
         edit_row("profiles.csv", 
                  ["accountemail", "profilename"], 
                  {"accountemail" : self._account._email, "profilename": self._profilename}, 
@@ -51,6 +48,9 @@ class Profile:
                   "watchlist": "/".join(self._watchlist)})
                 
     def load_from_csv(self):
+        """
+        Load in the age, watchhistory and watchlist of a profile from its profilename and accountemail
+        """
         data = find_row("profiles.csv", 
                         ["accountemail", "profilename"],
                         {"accountemail": self._account._email, "profilename": self._profilename})
@@ -64,15 +64,18 @@ class Profile:
             return False
 
 class Account:
-    def __init__(self, email, password):
+    """
+    Account interacting with app which holds profile objects and handles payment and login
+    """
+    def __init__(self, email: str, password: str):
         self.name = ""
         self._email : str = email
         self._plan = ""
         self._profilenames : list[Profile] = []
         self._password : str = password
         
-    def update_plan(self, new_plan): 
-        #accountname,email,password,plan,profiles
+    def update_plan(self, new_plan: str): 
+        #fields accountname,email,password,plan,profiles
         edit_row("accounts.csv", 
                  ["email"], 
                  {"email" : self._email}, 
@@ -82,8 +85,10 @@ class Account:
         
         self._plan = new_plan
     
-    def create_profile(self, name, age):
-        # not bothered to rewrite it with csvmodule
+    def create_profile(self, name: str, age: str):
+        """
+        Create a new profile
+        """
         fields = ["accountemail", "profilename", "age", "watchhistory"]
         if not find_row("profiles.csv", ["accountemail", "profilename"], {"accountemail": self._email, "profilename": name}):
             if not name in self._profilenames:
@@ -98,7 +103,10 @@ class Account:
                 })
             self.save_to_csv()
             
-    def delete_profile(self, profilename):
+    def delete_profile(self, profilename: str):
+        """
+        Delete a profile from an account by passing in its name
+        """
         if profilename in self._profilenames:
             delete_row("profiles.csv", ["accountemail", "profilename"],
                     {"accountemail": self._email,
@@ -107,12 +115,18 @@ class Account:
             self.save_to_csv()
     
     def save_to_csv(self):
+        """
+        save accountname, plan and profiles
+        """
         edit_row("accounts.csv", 
                  ["email", "password"], 
                  {"email" : self._email, "password": self._password}, 
                  {"accountname": self.name, "plan": self._plan, "profiles": "/".join(self._profilenames)})
     
     def load_from_csv(self):
+        """
+        load in name, plan, profilenames from email and password
+        """
         row = find_row("accounts.csv", 
                        ["email", "password"], 
                        {"email": self._email, "password": self._password})
@@ -125,13 +139,16 @@ class Account:
             print("account not found")
             return False
 
-def login(email, password):
+def login(email: str, password: str):
     testLogin = Account(email, password)
     if testLogin.load_from_csv():
         return testLogin
     return False
 
 def returnProfiles(account: Account):
+    """
+    Get all profiles under an account
+    """
     acc_profiles = []
     for profile  in account._profilenames:
         acc_profiles.append(Profile(account,profile))

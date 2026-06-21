@@ -5,6 +5,7 @@ import csvmodule as csvMod
 import requests
 from io import BytesIO
 
+# ids from https://www.themoviedb.org/talk/5daf6eb0ae36680011d7e6ee
 videogenres = {
     "28" : "Action" ,
     "12" : "Adventure" ,
@@ -42,28 +43,28 @@ class VideoData:
     Base class for tv shows and movies
     """
     AgeRatings = {"G": 0,"PG": 0,"M" : 12,"MA15+": 15,"R": 18}
-    def __init__(self, id, title, backdrop_path="", age_rating="", genre_ids="", genres="", **kwargs):
-        self.id = id
-        self.name = title
-        self.backdroppath = backdrop_path
-        self.backdropimage = None
-        self.age_rating = age_rating
-        self.genres = []
+    def __init__(self, id:str, title:str, backdrop_path="", age_rating="", genre_ids="", genres="", **kwargs):
+        self.id :str = id
+        self.name :str = title
+        self.backdroppath :str = backdrop_path
+        self.backdropimage :Image = None
+        self.age_rating :str = age_rating
+        self.genres :list[str] = []
         genre_ids = genre_ids.replace("]", "").replace("[", "").split(", ")
         genres = genres.split("/")
         for genre_id in genre_ids:
             if videogenres.get(genre_id):
                 self.genres.append(videogenres.get(genre_id))
         self.genres += genres
-        self.loaded = (id and title and backdrop_path and age_rating and genre_ids) or False
-    
-    def loadGenres(self): #convert numbers to genres
-        pass
+        self.loaded :bool = (id and title and backdrop_path and age_rating and genre_ids) == [''] or False
     
     def load(self): # method to override
         pass
     
-    def loadImage(self, path):
+    def loadImage(self, path:str):
+        """
+        Return an 200-wide image from a tmdb path
+        """
         if path:
             try:
                 ImageURL = "https://image.tmdb.org/t/p/w200" + path
@@ -74,21 +75,29 @@ class VideoData:
                 print("path", path, "could not be found")
     
     def loadImages(self):
+        """
+        Load all images of a video
+        """
         if self.loaded and not self.backdropimage and self.backdroppath:
             self.backdropimage = self.loadImage(self.backdroppath)
 
 class MovieData(VideoData):
+    """
+    Store Movie Data, child class of VideoData
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
     
-    def load(self):
+    def load(self): #overrides VideoData.load()
+        """
+        Load in movie information from a name
+        """
         if not self.loaded:
             #fields are id,title,backdrop_path,poster_path,genre_ids,age_rating
             data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
             if data:
                 self.backdroppath = data["backdrop_path"]
-                #moved to loadimages
-                #self.backdropimage = self.loadImage(data["backdrop_path"])
+                #poster image not in use
                 self.posterimage = None#self.loadImage(data["poster_path"])
                 self.genre_ids = data["genre_ids"]
                 self.age_rating = data["age_rating"]
@@ -96,61 +105,80 @@ class MovieData(VideoData):
         return self
         
 class TVEpisodeData:
-    def __init__(self, episode_id, show, season, episode_num, episode_title, backdrop_img, *args, **kwargs):
-        self.id = episode_id
-        self.show = show
-        self.season = season
-        self.episode = episode_num
-        self.title = episode_title
-        self.backdroppath = backdrop_img
+    """
+    Class stored in TVShowData.episodes attribute which gives information and images for an episode of a season of a show
+    """
+    def __init__(self, episode_id:str, show:str, season:str, episode_num:str, episode_title:str, backdrop_img:str, *args, **kwargs):
+        self.id:str = episode_id
+        self.show:str = show
+        self.season:str = season
+        self.episode:str = episode_num
+        self.title:str = episode_title
+        self.backdroppath:str = backdrop_img
+        self.backdropimg:Image = None
     
     def loadImage(self):
+        """
+        Return an 200-wide image and returns self
+        """
         path = self.backdroppath
         if path:
             try:
                 ImageURL = "https://image.tmdb.org/t/p/w200" + path
                 response = requests.get(ImageURL)
                 information = BytesIO(response.content)
-                return Image.open(information)
+                self.backdropimg = Image.open(information)
             except UnidentifiedImageError:
                 print("path", path, "could not be found")
-            return self
+        return self
 
 class TVShowData(VideoData):
+    """
+    Store TV Show data, child class of VideoData
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.seasons = kwargs.get("number_of_seasons")
-        self.episodes = []
+        self.seasons:str = kwargs.get("number_of_seasons")
+        self.episodes:list[TVEpisodeData] = []
         if not kwargs.get("number_of_seasons"):
             self.loaded = False
         if self.loaded:
             self.loadEpisodes()
     
     def loadEpisodes(self):
-
+        """
+        Load in all episodes of a tvshow, returns self
+        """
+        
         prevFound = True
         row = None
         season = 0
         episode = 1
+        
         while prevFound != False:
-            if not row:
+            if not row: # if there is no episode
                 prevFound = False
-                season += 1
+                season += 1 # check if there is another season
                 episode = 1
-            else:
-                episode += 1
+                
+            else: # if there is an episode
+                episode += 1 # check if there is a next episode
                 
             row = csvMod.find_row("episodes.csv", ["show", "season", "episode_num"],
                                         {"show": self.name,
                                          "season": str(season),
                                          "episode_num": str(episode)})
-            if row:
+            if row: 
                 print(self.name, "season", season, "episode", episode, "found")
                 self.episodes.append(TVEpisodeData(**row))
                 prevFound = True
         return self
     
     def loadEpisodeImages(self):
+        """
+        Load the images for all episodes in a TVShow
+        """
+        # used https://stackoverflow.com/questions/34512646/how-to-speed-up-api-requests
         threads = []
         for episode in self.episodes:
             threads.append(Thread(target=episode.loadImage))
@@ -162,9 +190,12 @@ class TVShowData(VideoData):
             
     
     def load(self):
+        """
+        load in information with the title of a show
+        """
         if not self.loaded:
             #fields are id,title,backdrop_path,poster_path,genre_ids,age_rating
-            data = csvMod.find_row("moviesdb.csv", ["title"], {"title": self.name})
+            data = csvMod.find_row("shows.csv", ["title"], {"title": self.name})
             if data:
                 self.backdroppath = data["backdrop_path"]
                 self.seasons = data["number_of_seasons"]
@@ -175,19 +206,25 @@ class TVShowData(VideoData):
         return self
 
 # function for filtering videos and movies
-def filter_videos(videos: list, genres: list, agerating: int):
+def filter_videos(videos: list[VideoData], genres: list[str], ageratings: list[str]):
+    """
+    Return a list of videos from a genres and within a set of ageratings
+    """
     indexes = []
     for i in range(len(videos)):
         video = videos[i]
-        for genre in genres:
-            if genre in video.genres:
-                if VideoData.AgeRatings[video.age_rating] <= agerating:
+        for genre in video.genres:
+            if genre in genres:
+                if video.age_rating in ageratings:
                     videos[i].loadImages()
                     indexes.append(i)
                     break
     return [videos[x] for x in indexes]
 
-def videos_from_ids(ids):
+def videos_from_ids(ids:list[str]):
+    '''
+    Return videos from a list of ids
+    '''
     found = []
     for movie in Movies + Shows:
         if movie.id in ids:
@@ -196,14 +233,17 @@ def videos_from_ids(ids):
         if show.id in ids:
             found.append(show)
     
+    # prevent indexerror by placing temporary values at each index
     reorderedfound = list(range(len(ids)))
     
-    # retain the ordering of the ids parameter
+    # retain the ordering of the ids parameter by putting the movie of each id
+    # back into its original place
     for video in found:
         if "Movie" in type(video).__name__:
             reorderedfound[ids.index(video.id)] = video
         elif "Show" in type(video).__name__:
             reorderedfound[ids.index(video.id)] = video
+    
     resultlist = []
     for value in reorderedfound:
         if not type(value) == int:
