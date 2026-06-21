@@ -744,7 +744,8 @@ class MenuPage(ctk.CTkFrame):
         
         def view_report():
             account : AccMod.Account = self.master.account
-            profiles: list[AccMod.Profile] = AccMod.returnProfiles(account)
+            #profiles: list[AccMod.Profile] = AccMod.returnProfiles(account)
+            profiles = account._profiles
             view_log = ""
             for profile in profiles:
                 view_log = view_log + profile._profilename + " - viewing history: "
@@ -946,5 +947,5 @@ if __name__ == "__main__":
             if profile.exists():
                 profile.save_to_csv()
             else:
-                app.account.create_profile(profile._profilename, profile.age, True)
+                app.account.create_profile(profile._profilename, profile._age, True)
 
