@@ -346,7 +346,7 @@ class StandardPage(ctk.CTkFrame):
             app._change_page("MenuPage")
     
         self.menu_button = ctk.CTkButton(self.headerframe, text="Menu",fg_color=ColourScheme.Button,bg_color=ColourScheme.Foreground,hover_color=ColourScheme.ButtonHover, command=goMenuPage)
-        self.menu_button.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
+        self.menu_button.grid(row=0, column=2, padx=10, pady=10, sticky="ne")
         
     
     def _build_ui(self): #method to be overwritten (DON'T TOUCH THIS)
@@ -681,8 +681,20 @@ class MenuPage(ctk.CTkFrame):
         self.browse_button.grid(row=1, column=1, padx=20, pady=5, sticky="ew")
         
         def view_report():
-            #enter watchlist code
-            pass
+            account : AccMod.Account = self.master.account
+            profiles: list[AccMod.Profile] = AccMod.returnProfiles(account)
+            view_log = ""
+            for profile in profiles:
+                view_log = view_log + profile._profilename + " - Shows watched: "
+                show_names = VidMod.videos_from_ids(profile._history)
+                for show in show_names:
+                    view_log = view_log + show.name + ", "
+                view_log = view_log + "\n"
+            view_log = view_log[:-3]
+            fh = open('acc_viewing_report.txt', 'w')
+            fh.write(view_log)
+            fh.close()
+
             
         self.watchlist_button = ctk.CTkButton(self, text="Download Viewing Report", command=view_report)
         self.watchlist_button.grid(row=2, column=1, padx=20, pady=5, sticky="ew")
