@@ -276,7 +276,7 @@ starttime = time()
 print("loading shows...")
 
 for row in csvMod.get_all_rows("shows.csv"):
-    Shows.append(TVShowData(**row).loadEpisodes())
+    Shows.append(TVShowData(**row))
     
 threads = []
 for show in Shows:
