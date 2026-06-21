@@ -104,18 +104,15 @@ class MovieData(VideoData):
                 self.loaded = True
         return self
         
-class TVEpisodeData:
+class TVEpisodeData(VideoData):
     """
     Class stored in TVShowData.episodes attribute which gives information and images for an episode of a season of a show
     """
     def __init__(self, episode_id:str, show:str, season:str, episode_num:str, episode_title:str, backdrop_img:str, *args, **kwargs):
-        self.id:str = episode_id
-        self.show:str = show
+        super().__init__(episode_id, show, backdrop_img, **kwargs)
         self.season:str = season
         self.episode:str = episode_num
-        self.title:str = episode_title
-        self.backdroppath:str = backdrop_img
-        self.backdropimg:Image = None
+        self.episodename:str = episode_title
     
     def loadImage(self):
         """
@@ -170,7 +167,7 @@ class TVShowData(VideoData):
                                          "episode_num": str(episode)})
             if row: 
                 print(self.name, "season", season, "episode", episode, "found")
-                self.episodes.append(TVEpisodeData(**row))
+                self.episodes.append(TVEpisodeData(age_rating=self.age_rating,**row))
                 prevFound = True
         return self
     
