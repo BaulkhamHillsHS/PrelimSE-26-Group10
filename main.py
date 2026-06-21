@@ -358,33 +358,39 @@ class VideoPage(StandardPage):
     """
     Screen to display when selecting a movie/show
     """
-    def __init__(self, master, videodata, *args, **kwargs):
+    def __init__(self, master, videodata, showdata=None, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
+        self.showdata: VidMod.TVShowData = showdata
         self.videodata : VidMod.VideoData = videodata
         self._build_ui()
     
-    def watchlist_button_event(self):
-        if self.videodata.id not in self.master.profile._watchlist:
-            self.master.profile._watchlist.append(self.videodata.id)
-            self.watchlistbutton.configure(text="Remove from watchlist")
-        else:
-            self.master.profile._watchlist.remove(self.videodata.id)
-            self.watchlistbutton.configure(text="Add to watchlist")
-    
-    
-    def watch_video(self):
-        if "tv" in type(self.videodata).__name__.lower(): #tvepisodedata
-            id = self.videodata.id.partition("_")[0]
-            # episodeid looks like 871727_SO1E02 so this gets only the id which is identical to the show id
-            if id not in self.master.profile._history:
-                self.master.profile._history.append(id)
-        
-        else:
-            if self.videodata.id not in self.master.profile._history:
-                self.master.profile._history.append(self.videodata.id)
-            
     
     def _build_ui(self):
+        def watchlist_button_event():
+            if self.videodata.id not in self.master.profile._watchlist:
+                self.master.profile._watchlist.append(self.videodata.id)
+                self.watchlistbutton.configure(text="Remove from watchlist")
+            else:
+                self.master.profile._watchlist.remove(self.videodata.id)
+                self.watchlistbutton.configure(text="Add to watchlist")
+    
+        def watch_video():
+            if "tv" in type(self.videodata).__name__.lower(): #tvepisodedata
+                id = self.videodata.id.partition("_")[0]
+                # episodeid looks like 871727_SO1E02 so this gets only the id which is identical to the show id
+                if id not in self.master.profile._history:
+                    self.master.profile._history.append(id)
+            
+            else:
+                if self.videodata.id not in self.master.profile._history:
+                    self.master.profile._history.append(self.videodata.id)
+                
+        def change_to_previous_page():
+            if self.showdata:
+                self.master._change_page("TVShowPage", self.showdata)
+            else:
+                self.master._change_page("BrowsingPage")
+        
         self.grid_columnconfigure((0),weight=1)
         self.grid_rowconfigure((0),weight=1)
         self.imagelabel = ctk.CTkLabel(self, text="",image=ctk.CTkImage(self.videodata.backdropimage, size=(720,480)))
@@ -392,7 +398,7 @@ class VideoPage(StandardPage):
         
         if not "tv" in type(self.videodata).__name__.lower():
             # don't add the add to watch list button
-            self.watchlistbutton = ctk.CTkButton(self,fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.watchlist_button_event)
+            self.watchlistbutton = ctk.CTkButton(self,fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=watchlist_button_event)
             
             if self.videodata.id in self.master.profile._watchlist:
                 self.watchlistbutton.configure(text="Remove from watchlist")
@@ -400,14 +406,12 @@ class VideoPage(StandardPage):
                 self.watchlistbutton.configure(text="Add to watchlist")
             self.watchlistbutton.grid(row=2,column=0,sticky="se")
         
-        self.watchbutton = ctk.CTkButton(self,text="Watch Video", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.watch_video)
+        self.watchbutton = ctk.CTkButton(self,text="Watch Video", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=watch_video)
         self.watchbutton.grid(row=2,column=1,sticky="se")
         
-        self.previouspagebutton = ctk.CTkButton(self,text="Return to Previous Page", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.master._change_to_previous_page)
+        self.previouspagebutton = ctk.CTkButton(self,text="Return to Previous Page", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=change_to_previous_page)
         self.previouspagebutton.grid(row=2,column=0,sticky="sw")
             
-            
-
 class TVShowPage(StandardPage):
     '''
     place to pick a tv episode
@@ -419,30 +423,33 @@ class TVShowPage(StandardPage):
         self.tvshowdata: VidMod.TVShowData = tvshowdata
         self._build_ui()
     
-    def watchlist_button_event(self):
-        if self.tvshowdata.id not in self.master.profile._watchlist:
-            self.master.profile._watchlist.append(self.tvshowdata.id)
-            self.watchlistbutton.configure(text="Remove from watchlist")
-        else:
-            self.master.profile._watchlist.remove(self.tvshowdata.id)
-            self.watchlistbutton.configure(text="Add to watchlist")
-    
     def _video_select_event(self, data):
-        self.master._change_page("VideoPage", data)
+            self.master._change_page("VideoPage", data, self.tvshowdata)
     
     def _build_ui(self):
+        def watchlist_button_event():
+            if self.tvshowdata.id not in self.master.profile._watchlist:
+                self.master.profile._watchlist.append(self.tvshowdata.id)
+                self.watchlistbutton.configure(text="Remove from watchlist")
+            else:
+                self.master.profile._watchlist.remove(self.tvshowdata.id)
+                self.watchlistbutton.configure(text="Add to watchlist")
+
+        def _back_to_browsingpage():
+            self.master._change_page("BrowsingPage")
+            
         self.videoswidget = VideoScrollFrameWidget(self, self.tvshowdata.name, self.tvshowdata.episodes,fg_color=ColourScheme.Foreground)
         self.videoswidget.grid(row=1,column=0)
         self.videoswidget._video_select_event = self._video_select_event
-    
-        self.watchlistbutton = ctk.CTkButton(self,fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.watchlist_button_event)        
+        
+        self.watchlistbutton = ctk.CTkButton(self,fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=watchlist_button_event)        
         if self.tvshowdata.id in self.master.profile._watchlist:
             self.watchlistbutton.configure(text="Remove from watchlist")
         else:
             self.watchlistbutton.configure(text="Add to watchlist")
         self.watchlistbutton.grid(row=2,column=0,sticky="se")
         
-        self.previouspagebutton = ctk.CTkButton(self,text="Return to Previous Page", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.master._change_to_previous_page)
+        self.previouspagebutton = ctk.CTkButton(self,text="Return to Previous Page", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=_back_to_browsingpage)
         self.previouspagebutton.grid(row=2,column=0,sticky="sw")
         
 class BrowsingPage(StandardPage):
@@ -855,13 +862,6 @@ class StreamingApp(ctk.CTk):
             self.currentpage.grid(row=0, column=0, sticky="nesw")
         else:
             raise KeyError(f"Page {newpage} does not exist")
-    
-    def _change_to_previous_page(self):
-        temp = self.currentpage
-        self.currentpage = self.previouspage
-        self.previouspage = temp
-        self.previouspage.grid_remove()
-        self.currentpage.grid(row=0,column=0,sticky="nesw")
     
     #this method is no longer used anywhere should we delete it???
     def _test_page(self, page):
