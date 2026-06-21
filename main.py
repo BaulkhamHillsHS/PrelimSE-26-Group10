@@ -152,8 +152,8 @@ class ProfileCreator(ctk.CTkToplevel): #basically a copy of profile editor
         self._build_ui()
     
     def _create_profile(self):
-        ageentry = self.ageentry.get()
-        nameentry = self.nameentry.get()
+        ageentry = self.ageentry.get().strip()
+        nameentry = self.nameentry.get().strip()
         error = ""
         
         if nameentry:
@@ -615,9 +615,9 @@ class LoginPage(ctk.CTkFrame):
             
     def Login(self, email, password):  
         #uses  account modules login function to check if account exists
-        userAccount = AccMod.login(email, password)
+        userAccount = AccMod.login(email.lower(), password)
         if userAccount != False:
-            messagebox.showwarning('Login Successful', 'You have sucessfully logged in!')
+            messagebox.showwarning('Login Successful', 'You have successfully logged in!')
             self._2FactAuth(userAccount, email)                        
         elif not email or not password: 
             messagebox.showwarning('Details Missing', 'Please enter both email and password')
@@ -738,7 +738,8 @@ class MenuPage(ctk.CTkFrame):
         
         def view_report():
             account : AccMod.Account = self.master.account
-            profiles: list[AccMod.Profile] = AccMod.returnProfiles(account)
+            #profiles: list[AccMod.Profile] = AccMod.returnProfiles(account)
+            profiles = account._profiles
             view_log = ""
             for profile in profiles:
                 view_log = view_log + profile._profilename + " - viewing history: "
@@ -940,5 +941,5 @@ if __name__ == "__main__":
             if profile.exists():
                 profile.save_to_csv()
             else:
-                app.account.create_profile(profile._profilename, profile.age, True)
+                app.account.create_profile(profile._profilename, profile._age, True)
 
