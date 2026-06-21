@@ -52,6 +52,21 @@ class Profile:
                  {"accountemail" : self._account._email, "profilename": self._profilename}, 
                  {"watchhistory": "/".join(self._history),
                   "watchlist": "/".join(self._watchlist)})
+    
+    def exists(self):
+        '''
+        see if profile is saved in csv
+        '''
+        data = find_row("profiles.csv", 
+                        ["accountemail", "profilename"],
+                        {"accountemail": self._account._email, "profilename": self._profilename})
+        
+        if data:
+            return True
+        else:
+            print("profile not found")
+            return False
+        
                 
     def load_from_csv(self):
         """

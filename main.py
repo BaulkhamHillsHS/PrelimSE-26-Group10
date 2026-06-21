@@ -235,7 +235,7 @@ class ProfileEditor(ctk.CTkToplevel):
         self.profile : AccMod.Profile = profile
         
         self.profile_is_new = True
-        if self.profile.load_from_csv(): # new profiles cannot be read from csv
+        if self.profile.exists(): # new profiles cannot be read from csv
             self.profile_is_new = False
         self._build_ui()
     
@@ -333,7 +333,7 @@ class StandardPage(ctk.CTkFrame):
     
     def _build_header(self):
         logo = Image.open("Images/appname_ss_logo.png")
-        self.grid_columnconfigure((0,1,2), weight=1)
+        self.grid_columnconfigure((0,1,), weight=1)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
         
         self.headerframe = ctk.CTkFrame(self,fg_color=ColourScheme.Foreground)
@@ -363,10 +363,87 @@ class VideoPage(StandardPage):
         self.videodata : VidMod.VideoData = videodata
         self._build_ui()
     
+    def watchlist_button_event(self):
+        if self.videodata.id not in self.master.profile._watchlist:
+            self.master.profile._watchlist.append(self.videodata.id)
+            self.watchlistbutton.configure(text="Remove from watchlist")
+        else:
+            self.master.profile._watchlist.remove(self.videodata.id)
+            self.watchlistbutton.configure(text="Add to watchlist")
+    
+    
+    def watch_video(self):
+        if "tv" in type(self.videodata).__name__.lower(): #tvepisodedata
+            id = self.videodata.id.partition("_")[0]
+            # episodeid looks like 871727_SO1E02 so this gets only the id which is identical to the show id
+            if id not in self.master.profile._history:
+                self.master.profile._history.append(id)
+        
+        else:
+            if self.videodata.id not in self.master.profile._history:
+                self.master.profile._history.append(self.videodata.id)
+            
+    
     def _build_ui(self):
         self.grid_columnconfigure((0),weight=1)
         self.grid_rowconfigure((0),weight=1)
+        self.imagelabel = ctk.CTkLabel(self, text="",image=ctk.CTkImage(self.videodata.backdropimage, size=(720,480)))
+        self.imagelabel.grid(row=1,column=0,columnspan=2)
+        
+        if not "tv" in type(self.videodata).__name__.lower():
+            # don't add the add to watch list button
+            self.watchlistbutton = ctk.CTkButton(self,fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.watchlist_button_event)
+            
+            if self.videodata.id in self.master.profile._watchlist:
+                self.watchlistbutton.configure(text="Remove from watchlist")
+            else:
+                self.watchlistbutton.configure(text="Add to watchlist")
+            self.watchlistbutton.grid(row=2,column=0,sticky="se")
+        
+        self.watchbutton = ctk.CTkButton(self,text="Watch Video", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.watch_video)
+        self.watchbutton.grid(row=2,column=1,sticky="se")
+        
+        self.previouspagebutton = ctk.CTkButton(self,text="Return to Previous Page", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.master._change_to_previous_page)
+        self.previouspagebutton.grid(row=2,column=0,sticky="sw")
+            
+            
 
+class TVShowPage(StandardPage):
+    '''
+    place to pick a tv episode
+    '''
+    
+    def __init__(self, master, tvshowdata: VidMod.TVShowData, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+        tvshowdata.loadEpisodeImages()
+        self.tvshowdata: VidMod.TVShowData = tvshowdata
+        self._build_ui()
+    
+    def watchlist_button_event(self):
+        if self.tvshowdata.id not in self.master.profile._watchlist:
+            self.master.profile._watchlist.append(self.tvshowdata.id)
+            self.watchlistbutton.configure(text="Remove from watchlist")
+        else:
+            self.master.profile._watchlist.remove(self.tvshowdata.id)
+            self.watchlistbutton.configure(text="Add to watchlist")
+    
+    def _video_select_event(self, data):
+        self.master._change_page("VideoPage", data)
+    
+    def _build_ui(self):
+        self.videoswidget = VideoScrollFrameWidget(self, self.tvshowdata.name, self.tvshowdata.episodes,fg_color=ColourScheme.Foreground)
+        self.videoswidget.grid(row=1,column=0)
+        self.videoswidget._video_select_event = self._video_select_event
+    
+        self.watchlistbutton = ctk.CTkButton(self,fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.watchlist_button_event)        
+        if self.tvshowdata.id in self.master.profile._watchlist:
+            self.watchlistbutton.configure(text="Remove from watchlist")
+        else:
+            self.watchlistbutton.configure(text="Add to watchlist")
+        self.watchlistbutton.grid(row=2,column=0,sticky="se")
+        
+        self.previouspagebutton = ctk.CTkButton(self,text="Return to Previous Page", fg_color=ColourScheme.Button,hover_color=ColourScheme.ButtonHover,command=self.master._change_to_previous_page)
+        self.previouspagebutton.grid(row=2,column=0,sticky="sw")
         
 class BrowsingPage(StandardPage):
     '''
@@ -392,15 +469,14 @@ class BrowsingPage(StandardPage):
     def apply_filters(self):
         pass
     
+    def add_filter(self):
+        pass
+    
     def _video_select_event(self, videodata):
-        if videodata.id not in self.master.profile._history:
-            if self.master.profile._history == [""]:
-                self.master.profile._history = [videodata.id]
-            else:
-                self.master.profile._history.append(videodata.id)
-                
-            self.master.profile.save_to_csv()
-        self.master._change_page("VideoPage", videodata)
+        if "show" in type(videodata).__name__.lower():
+            self.master._change_page("TVShowPage", videodata)
+        else:
+            self.master._change_page("VideoPage", videodata)
     
     def _build_ui(self):
         screenwidth = self.master.winfo_screenwidth()
@@ -471,8 +547,8 @@ class LoginPage(ctk.CTkFrame):
         
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
-        server.sendmail(email, receiver_email, email_message)
-        #code = "123456"
+        #server.sendmail(email, receiver_email, email_message)
+        code = "123456"
 
         def checkUsercode(usercode, code):    
             if usercode == code:
@@ -721,6 +797,7 @@ class ProfilePage(ctk.CTkFrame):
 pages : dict = {"StandardPage": StandardPage, 
                 "ProfilePage": ProfilePage,
                 "VideoPage": VideoPage,
+                "TVShowPage": TVShowPage,
                 "BrowsingPage": BrowsingPage, 
                 "SubscriptionManagementPage": SubscriptionManagementPage, 
                 "LoginPage": LoginPage, 
@@ -738,6 +815,7 @@ class StreamingApp(ctk.CTk):
         self.geometry("10000x10000")
         self.title("App Name Streaming Service")
         self.currentpage: ctk.CTkFrame = None
+        self.previouspage: ctk.CTkFrame = None
         self.account : AccMod.Account = None
         self.profile : AccMod.Profile = None
         
@@ -752,16 +830,26 @@ class StreamingApp(ctk.CTk):
         if pages.get(newpage):
             # undisplay the previous page
             if self.currentpage:
-                # deletes the old page
-                self.currentpage.destroy()
+                # unplaces the old page
+                self.currentpage.grid_remove()
+            if self.previouspage:
+                self.previouspage.destroy()
                 
             # create a new page
+            self.previouspage = self.currentpage
             self.currentpage = pages[newpage](self, *args, **kwargs)
             
             # display the new page
             self.currentpage.grid(row=0, column=0, sticky="nesw")
         else:
             raise KeyError(f"Page {newpage} does not exist")
+    
+    def _change_to_previous_page(self):
+        temp = self.currentpage
+        self.currentpage = self.previouspage
+        self.previouspage = temp
+        self.previouspage.grid_remove()
+        self.currentpage.grid(row=0,column=0,sticky="nesw")
     
     #this method is no longer used anywhere should we delete it???
     def _test_page(self, page):
@@ -781,10 +869,11 @@ if __name__ == "__main__":
     app.mainloop()
     
     #run on app close
-    app.account.save_to_csv()
-    for profile in app.account._profiles:
-        if profile.load_from_csv():
-            profile.save_to_csv()
-        else:
-            app.account.create_profile(profile._profilename, profile.age, True)
+    if app.account:
+        app.account.save_to_csv()
+        for profile in app.account._profiles:
+            if profile.exists():
+                profile.save_to_csv()
+            else:
+                app.account.create_profile(profile._profilename, profile.age, True)
 

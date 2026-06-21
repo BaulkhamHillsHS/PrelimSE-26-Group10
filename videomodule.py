@@ -109,24 +109,16 @@ class TVEpisodeData(VideoData):
     Class stored in TVShowData.episodes attribute which gives information and images for an episode of a season of a show
     """
     def __init__(self, episode_id:str, show:str, season:str, episode_num:str, episode_title:str, backdrop_img:str, *args, **kwargs):
-        super().__init__(episode_id, show, backdrop_img, **kwargs)
+        super().__init__(episode_id, "", backdrop_img, **kwargs)
         self.season:str = season
         self.episode:str = episode_num
-        self.episodename:str = episode_title
+        self.showname:str = show
+        self.name:str = episode_title
+
+    def loadImages(self):
+        self.backdropimage = self.loadImage(self.backdroppath)
     
-    def loadImage(self):
-        """
-        Return an 200-wide image and returns self
-        """
-        path = self.backdroppath
-        if path:
-            try:
-                ImageURL = "https://image.tmdb.org/t/p/w200" + path
-                response = requests.get(ImageURL)
-                information = BytesIO(response.content)
-                self.backdropimg = Image.open(information)
-            except UnidentifiedImageError:
-                print("path", path, "could not be found")
+    def load(self):
         return self
 
 class TVShowData(VideoData):
@@ -178,7 +170,7 @@ class TVShowData(VideoData):
         # used https://stackoverflow.com/questions/34512646/how-to-speed-up-api-requests
         threads = []
         for episode in self.episodes:
-            threads.append(Thread(target=episode.loadImage))
+            threads.append(Thread(target=episode.loadImages))
             threads[-1].start()
             
         for thread in threads:
