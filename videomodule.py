@@ -56,7 +56,7 @@ class VideoData:
             if videogenres.get(genre_id):
                 self.genres.append(videogenres.get(genre_id))
         self.genres += genres
-        self.loaded :bool = (id and title and backdrop_path and age_rating and genre_ids) == [''] or False
+        self.loaded :bool = (id != None and title != None and backdrop_path != "" and age_rating != "" and (genre_ids != "" or genres != ""))
     
     def load(self): # method to override
         pass
