@@ -619,7 +619,7 @@ class LoginPage(ctk.CTkFrame):
             
     def Login(self, email, password):  
         #uses  account modules login function to check if account exists
-        userAccount = AccMod.login(email, password)
+        userAccount = AccMod.login(email.lower(), password)
         if userAccount != False:
             messagebox.showwarning('Login Successful', 'You have sucessfully logged in!')
             self._2FactAuth(userAccount, email)                        
