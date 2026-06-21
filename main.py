@@ -14,7 +14,6 @@ class FontStyle:
     Text = ("Arial", 14)
 
 class ColourScheme: # for colours that won't change throughout whole app
-    #temporary (looks very bad)
     Primary = "#2d8a1f"
     Secondary = "#dee60e"
     Foreground = "#161616"
@@ -605,11 +604,8 @@ class LoginPage(ctk.CTkFrame):
         server.starttls()
         server.login(email,"luruzlexucsjtmjg")
         
-        # the line below is temporarily disabled as I do not want to send 5 million emails
-        # to random accounts while testing out other functions!
         server.sendmail(email, receiver_email, email_message)
-        #code = "123456"
-
+    
         def checkUsercode(usercode, code):    
             if usercode == code:
                 self._goToStreamingApp(userAccount)
@@ -715,8 +711,6 @@ class SubscriptionManagementPage(ctk.CTkFrame):
         self.premium_button = ctk.CTkButton(self, text="Premium Plan: $15.99/month", fg_color=ColourScheme.Button, hover_color=ColourScheme.ButtonHover, command=change_to_premium)
         self.premium_button.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
         
-        ## popup that ask you if you are sure that you want to change the plan
-        ## txt file showing supscription invoice after change of plan
         
 class MenuPage(ctk.CTkFrame):
     '''
@@ -871,7 +865,7 @@ class ProfilePage(ctk.CTkFrame):
         self.profilecreator_button.grid(row=5, column=2)
         self.log_out_button.grid(row=5, column=3, padx=20, pady=30, sticky="sw")
         
-# used to map a string to a class (useless)
+# used to map a string to a class 
 pages : dict = {"StandardPage": StandardPage, 
                 "ProfilePage": ProfilePage,
                 "VideoPage": VideoPage,
