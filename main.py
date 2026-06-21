@@ -65,9 +65,9 @@ class VideoScrollFrameWidget(ctk.CTkFrame):
     
     def __init__(self, master, title: str, videos: list[VidMod.VideoData], *args, width=2000, **kwargs):
         super().__init__(master, *args, width=width, **kwargs)
-        self.width = width
-        self.title = title
-        self.videos = videos
+        self.width :int = width
+        self.title :str = title
+        self.videos :list[VidMod.VideoData]= videos
         self._build_ui()
     
     def _video_select_event(self, data):
@@ -100,7 +100,7 @@ class ProfileWidget(ctk.CTkFrame):
     profileimage = Image.open("Images/userimage.png")
     def __init__(self, master, name, *args, **kwargs):
         super().__init__(master, *args, fg_color=ColourScheme.Foreground, bg_color=ColourScheme.Foreground, **kwargs)
-        self.name = name
+        self.name :str = name
         self._build_ui()
     
     def _button_click(self, widget, name):
@@ -221,18 +221,22 @@ class ProfileEditor(ctk.CTkToplevel):
     Profile editor
     '''
     
-    def __init__(self, profilepage, account, profilename, *args, **kwargs):
+    def __init__(self, profilepage, account, profile, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("400x400")
         self._fg_color = ColourScheme.Background
         self.focus()
+        profilename = profile._profilename
         self.title(profilename + "'s Settings")
         
         self.profilepage: ProfilePage = profilepage
         self.account: AccMod.Account = account
-        self.profilename = profilename
-        self.profile = AccMod.Profile(self.account, self.profilename)
-        self.profile.load_from_csv()
+        self.profilename : str = profilename
+        self.profile : AccMod.Profile = profile
+        
+        self.profile_is_new = True
+        if self.profile.load_from_csv(): # new profiles cannot be read from csv
+            self.profile_is_new = False
         self._build_ui()
     
     def _save_changes(self):
@@ -272,12 +276,20 @@ class ProfileEditor(ctk.CTkToplevel):
             self.errorlabel.configure(text=error)
         else:
             if messagebox.askyesno("Edit Profile", f"Do you want to edit profile {self.profilename}?"):
-                if nameentry != "" and ageentry != "":
-                    self.profile.update_details(nameentry, ageentry)
-                elif nameentry != "":
-                    self.profile.update_details(nameentry, self.profile._age)
-                elif ageentry!= " ":
-                    self.profile.update_details(self.profilename, ageentry)
+                if self.profile_is_new:
+                    if nameentry != "" and ageentry != "":
+                        self.profile.update_details(nameentry, ageentry)
+                    elif nameentry != "":
+                        self.profile.update_details(nameentry, self.profile._age)
+                    elif ageentry!= "":
+                        self.profile.update_details(self.profilename, ageentry)
+                else:
+                    if nameentry != "" and ageentry != "":
+                        self.profile.update_details(nameentry, ageentry, True)
+                    elif nameentry != "":
+                        self.profile.update_details(nameentry, self.profile._age, True)
+                    elif ageentry!= "":
+                        self.profile.update_details(self.profilename, ageentry, True)
                 
                 self.profilepage._build_profilesframe()
                 self.destroy()
@@ -348,7 +360,7 @@ class VideoPage(StandardPage):
     """
     def __init__(self, master, videodata, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
-        self.videodata = videodata
+        self.videodata : VidMod.VideoData = videodata
         self._build_ui()
     
     def _build_ui(self):
@@ -363,7 +375,22 @@ class BrowsingPage(StandardPage):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.get_allowed_videos()
         self._build_ui()
+    
+    def get_allowed_videos(self):
+        self.allowedratings : list[str] = list(VidMod.VideoData.AgeRatings.keys())
+        for rating in VidMod.VideoData.AgeRatings:
+            if VidMod.VideoData.AgeRatings[rating] > int(self.master.profile._age):
+                self.allowedratings.remove(rating)
+        
+        self.shows = VidMod.filter_videos(VidMod.Shows, VidMod.videogenres.values(), self.allowedratings)
+        self.movies = VidMod.filter_videos(VidMod.Movies, VidMod.videogenres.values(), self.allowedratings)
+        self.watchhistory = VidMod.filter_videos(VidMod.videos_from_ids(self.master.profile._history), VidMod.videogenres.values(), self.allowedratings)
+        self.watchlist = VidMod.filter_videos(VidMod.videos_from_ids(self.master.profile._watchlist), VidMod.videogenres.values(), self.allowedratings)
+    
+    def apply_filters(self):
+        pass
     
     def _video_select_event(self, videodata):
         if videodata.id not in self.master.profile._history:
@@ -444,8 +471,8 @@ class LoginPage(ctk.CTkFrame):
         
         # the line below is temporarily disabled as I do not want to send 5 million emails
         # to random accounts while testing out other functions!
-        server.sendmail(email, receiver_email, email_message)
-        #code = "123456"
+        #server.sendmail(email, receiver_email, email_message)
+        code = "123456"
 
         def checkUsercode(usercode, code):    
             if usercode == code:
@@ -605,6 +632,7 @@ class ProfilePage(ctk.CTkFrame):
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, fg_color=ColourScheme.Background, bg_color=ColourScheme.Background, **kwargs)
+        self.account : AccMod.Account = self.master.account
         self.profilesframe = None
         self._build_ui()
         self.edit_profile = False
@@ -616,12 +644,18 @@ class ProfilePage(ctk.CTkFrame):
         
         if self.edit_profile:
             # enter the profile editor
-            editor = ProfileEditor(self, self.master.account, profilename)
+            editedprofile = None
+            for profile in self.master.account._profiles:
+                if profile._profilename == profilename:
+                    editedprofile = profile
+            ProfileEditor(self, self.master.account, editedprofile)
         else:
             # enters menu page with the profile
-            self.master.profile = AccMod.Profile(self.master.account, profilename)
-            if self.master.profile.load_from_csv():
-                self.master._change_page("MenuPage")
+            for profile in self.master.account._profiles:
+                if profile._profilename == profilename:
+                    self.master.profile = profile
+                    break
+            self.master._change_page("MenuPage")
     
     def _build_profilesframe(self):
         if self.profilesframe:
@@ -629,8 +663,7 @@ class ProfilePage(ctk.CTkFrame):
             for profilewidget in self.profilesframe.winfo_children():
                 profilewidget.destroy()
         
-        account : AccMod.Account = self.master.account
-        profilenames = account._profilenames
+        profilenames = self.account._profilenames
         lenprofiles = len(profilenames)
         
         self.profilesframe = ctk.CTkFrame(self, fg_color=ColourScheme.Foreground, bg_color=ColourScheme.Foreground)
@@ -746,4 +779,12 @@ if __name__ == "__main__":
     app = StreamingApp()
     app._change_page("LoginPage")
     app.mainloop()
+    
+    #run on app close
+    app.account.save_to_csv()
+    for profile in app.account._profiles:
+        if profile.load_from_csv():
+            profile.save_to_csv()
+        else:
+            app.account.create_profile(profile._profilename, profile.age, True)
 
