@@ -747,7 +747,7 @@ class MenuPage(ctk.CTkFrame):
             profiles: list[AccMod.Profile] = AccMod.returnProfiles(account)
             view_log = ""
             for profile in profiles:
-                view_log = view_log + profile._profilename + " - Shows watched: "
+                view_log = view_log + profile._profilename + " - viewing history: "
                 show_names = VidMod.videos_from_ids(profile._history)
                 for show in show_names:
                     view_log = view_log + show.name + ", "
